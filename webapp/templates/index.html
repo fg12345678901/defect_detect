@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Defect Detection</title>
+</head>
+<body>
+    <h1>Defect Detection Demo</h1>
+    <h3>Select dataset</h3>
+    <ul>
+        {% for t in tasks %}
+        <li><a href="{{ url_for('task_page', task=t) }}">{{ t }}</a></li>
+        {% endfor %}
+    </ul>
+    <h3>Or classify automatically</h3>
+    <a href="{{ url_for('classify_upload') }}">Upload for classification</a>
+</body>
+</html>

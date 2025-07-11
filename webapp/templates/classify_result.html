@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>分类结果</title>
+</head>
+<body>
+    <h1>分类与分割结果</h1>
+    <ul>
+        {% for r in results %}
+        <li>{{ r.task }} - <img src="{{ url_for('static', filename='pred_vis/' + r.image) }}" width="200"></li>
+        {% endfor %}
+    </ul>
+    <a href="/">返回首页</a>
+</body>
+</html>

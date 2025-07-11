@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批量检测结果 - 缺陷检测</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+  <div class="container py-5">
+    <h1>批量检测结果分析</h1>
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">检测总览</div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-md-6">
+                <h3 class="text-primary">{{ stats.total_images }}</h3>
+                <p class="text-muted mb-0">总图片数</p>
+              </div>
+              <div class="col-md-6">
+                <h3 class="text-danger">{{ stats.defect_images }}</h3>
+                <p class="text-muted mb-0">有缺陷图片数</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-12 text-center">
+        <a href="/" class="btn btn-outline-secondary">返回首页</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
