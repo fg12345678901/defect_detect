@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ task }} detection</title>
+</head>
+<body>
+    <h1>{{ task }} detection</h1>
+    <h3>Single image</h3>
+    <form action="{{ url_for('task_single', task=task) }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" required>
+        <button type="submit">Detect</button>
+    </form>
+    <h3>Batch images</h3>
+    <form action="{{ url_for('task_batch', task=task) }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="images" multiple required>
+        <button type="submit">Detect Batch</button>
+    </form>
+</body>
+</html>
