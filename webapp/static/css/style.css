@@ -1,26 +1,488 @@
+/* static/css/style.css */
+
+
+:root {
+  --primary: #2c3e50;
+  --secondary: #34495e;
+  --accent: #3498db;
+  --accent-light: #5dade2;
+  --success: #2ecc71;
+  --danger: #e74c3c;
+  --warning: #f39c12;
+  --light: #ecf0f1;
+  --dark: #1a252f;
+  --gray: #95a5a6;
+  --gray-light: #e0e0e0;
+
+  /* Defect colors - standardized across the application */
+  --defect-color-1: #e74c3c; /* 夹杂物 - red */
+  --defect-color-2: #2ecc71; /* 补丁 - green */
+  --defect-color-3: #3498db; /* 划痕 - blue */
+  --defect-color-4: #f39c12; /* 其他缺陷 - yellow */
+  --defect-color-0: #95a5a6; /* 无缺陷 - gray */
+
+  --border-radius: 6px;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+/* Base styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+h1 {
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+h1:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 70px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+/* Header & Navigation */
+.navbar {
+  background-color: var(--primary);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 1rem 0;
+}
+
+.navbar-brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white !important;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  transition: var(--transition);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: white;
+}
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background-color: var(--light);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 4px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 500;
+  transition: var(--transition);
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-light);
+  border-color: var(--accent-light);
+}
+
+.btn-success {
+  background-color: var(--success);
+  border-color: var(--success);
+}
+
+.btn-outline-secondary {
+  color: var(--secondary);
+  border-color: var(--secondary);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--secondary);
+  color: white;
+}
+
+/* Image containers */
+.img-container {
+  margin-bottom: 1.5rem;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+  position: relative;
+}
+
+.img-container img {
+  width: 100%;
+  display: block;
+  transition: var(--transition);
+}
+
+.comparison-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.comparison-container .img-card {
+  flex: 1;
+  min-width: 300px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+.comparison-container .img-header {
+  background-color: var(--light);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: var(--primary);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.comparison-container .img-body {
+  padding: 1rem;
+  background-color: white;
+}
+
+/* Forms */
+.form-control {
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gray-light);
+  transition: var(--transition);
+}
+
+.form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Fix for issue #1 - Add more spacing to help text */
+.form-text {
+  display: block;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem; /* Added for better spacing */
+  clear: both;
+}
+
+.custom-file-label {
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1rem;
+  height: auto;
+}
+
+.custom-file-input:focus ~ .custom-file-label {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Progress bar */
+.progress {
+  height: 25px;
+  border-radius: var(--border-radius);
+  margin: 1.5rem 0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  background-color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Defect result highlight */
+.defect-highlight {
+  background-color: #fff8e1;
+  border-left: 4px solid var(--warning);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
 
 .defect-badge {
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: #fff;
-  font-size: 0.8rem;
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 30px;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
 }
-.defect-badge-0 { background-color: #6c757d; }
-.defect-badge-4 { background-color: #17a2b8; }
 
-.category-folder {
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
+/* Updated to use standardized color variables */
+.defect-badge-1 {
+  background-color: rgba(231, 76, 60, 0.2);
+  color: var(--defect-color-1);
 }
-.category-folder-header {
-  padding: 6px 10px;
-  cursor: pointer;
+
+.defect-badge-2 {
+  background-color: rgba(46, 204, 113, 0.2);
+  color: var(--defect-color-2);
+}
+
+.defect-badge-3 {
+  background-color: rgba(52, 152, 219, 0.2);
+  color: var(--defect-color-3);
+}
+
+.defect-badge-4 {
+  background-color: rgba(243, 156, 18, 0.2);
+  color: var(--defect-color-4);
+}
+
+.defect-badge-0 {
+  background-color: rgba(149, 165, 166, 0.2);
+  color: var(--defect-color-0);
+}
+
+/* Chart container */
+.chart-container {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  min-height: 300px;
+}
+
+.chart-legend {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.legend-item {
+  display: flex;
   align-items: center;
+  margin-right: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  margin-right: 0.5rem;
+}
+
+/* Results table */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+}
+
+.results-table th,
+.results-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gray-light);
+}
+
+.results-table th {
+  background-color: var(--light);
+  font-weight: 600;
+  text-align: left;
+}
+
+.results-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+/* New animations for enhanced UI */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pulse {
+  animation: pulse 1.5s ease infinite;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease forwards;
+}
+
+/* Image hover effects */
+.image-item {
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.image-item img {
+  transition: transform 0.3s ease;
+}
+
+.image-item:hover img {
+  transform: scale(1.05);
+}
+
+.image-item .small {
+  transition: var(--transition);
+}
+
+.image-item:hover .small {
+  color: var(--accent);
+}
+
+/* Color indicators for defect types */
+.color-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.color-indicator-1 { background-color: var(--defect-color-1); }
+.color-indicator-2 { background-color: var(--defect-color-2); }
+.color-indicator-3 { background-color: var(--defect-color-3); }
+.color-indicator-4 { background-color: var(--defect-color-4); }
+.color-indicator-0 { background-color: var(--defect-color-0); }
+
+/* Enhanced accordion styling */
+.accordion .card-header {
+  padding: 0;
+  transition: var(--transition);
+}
+
+.accordion .card-header:hover {
   background-color: #f8f9fa;
 }
+
+.accordion .btn-link {
+  color: var(--primary);
+  text-decoration: none;
+  padding: 1rem 1.25rem;
+  width: 100%;
+  text-align: left;
+}
+
+.accordion .btn-link:hover {
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.accordion .btn-link i {
+  transition: transform 0.3s ease;
+}
+
+.accordion .btn-link[aria-expanded="true"] i {
+  transform: rotate(180deg);
+}
+
+/* Enhanced category folders styling */
+.category-folder {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  transition: var(--transition);
+}
+
+.category-folder:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.category-folder-header {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gray-light);
+}
+
 .category-folder-body {
-  padding: 10px;
-  border-top: 1px solid #dee2e6;
+  padding: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+  .card-body { padding: 1.25rem; }
+  .comparison-container { flex-direction: column; }
+  .comparison-container .img-card { width: 100%; }
 }
