@@ -266,6 +266,7 @@ def generate_pie_chart_base64(data, task, title="缺陷分布"):
             colors=colors,
             startangle=90,
             textprops={"fontsize": 12},
+            wedgeprops={"width": 0.4, "edgecolor": "white"},
         )
         # 设置标签字体
         for text in texts:
@@ -462,6 +463,49 @@ def download_report():
         total = sum(v["total_images"] for v in stats.values())
         total_defects = sum(v["defect_images"] for v in stats.values())
 
+        task_counts = {}
+        for t, s in stats.items():
+            if s["total_images"] > 0:
+                task_cn = TASK_INFO["tasks"][t]["task_name_cn"]
+                task_counts[task_cn] = s["total_images"]
+
+        task_pie_base64 = None
+        if task_counts:
+            plt.rcParams["font.sans-serif"] = ["SimHei", "DejaVu Sans"]
+            plt.rcParams["axes.unicode_minus"] = False
+
+            labels = list(task_counts.keys())
+            sizes = list(task_counts.values())
+            colors = [
+                f"#{r:02x}{g:02x}{b:02x}"
+                for r, g, b in [
+                    (231, 76, 60),
+                    (52, 152, 219),
+                    (46, 204, 113),
+                    (155, 89, 182),
+                ][: len(labels)]
+            ]
+
+            fig, ax = plt.subplots(figsize=(8, 6))
+            ax.pie(
+                sizes,
+                labels=labels,
+                autopct="%1.1f%%",
+                colors=colors,
+                startangle=90,
+                textprops={"fontsize": 12},
+                wedgeprops={"width": 0.4, "edgecolor": "white"},
+            )
+            ax.set_title("任务类型分布", fontsize=16, weight="bold", pad=20)
+
+            buf = io.BytesIO()
+            plt.savefig(
+                buf, format="png", dpi=150, bbox_inches="tight", facecolor="white"
+            )
+            buf.seek(0)
+            task_pie_base64 = base64.b64encode(buf.getvalue()).decode()
+            plt.close(fig)
+
         # 准备报告数据
         report_data = {
             "task": "classify",
@@ -475,6 +519,7 @@ def download_report():
                 for t, c in _progress["class_counts"].items()
                 if any(v > 0 for v in c.values())
             },
+            "task_pie_base64": task_pie_base64,
             "current_datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "current_year": datetime.now().year,
             "task_info": TASK_INFO,
