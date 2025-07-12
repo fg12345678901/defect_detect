@@ -3,100 +3,532 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>自动分类检测结果</title>
+  <title>自动分类检测结果 - 工业表面缺陷检测系统</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- 添加 Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar">
     <div class="container">
       <a class="navbar-brand" href="{{ url_for('index') }}">
-        <i class="fas fa-industry mr-2"></i>表面缺陷检测系统
+        <i class="fas fa-microscope mr-2"></i>工业表面缺陷智能检测系统
       </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">首页</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">检测结果</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
+  <!-- 主内容 -->
   <div class="container py-5">
-    <h1><i class="fas fa-chart-bar mr-2"></i>自动分类检测结果</h1>
+    <div class="text-center mb-5">
+      <h1 class="section-title">
+        <i class="fas fa-magic mr-3"></i>智能分类检测结果
+      </h1>
+      <p class="section-subtitle">系统已自动识别图片类型并完成缺陷检测</p>
+    </div>
 
-    <div class="row mt-4">
-      <div class="col-md-6">
-        <div class="card fade-in">
-          <div class="card-header">
-            <i class="fas fa-chart-pie mr-2"></i>各任务图像占比
-          </div>
-          <div class="card-body">
-            <canvas id="taskChart" data-chart="pie"
-                    data-values='{{ task_counts|tojson }}'
-                    data-colors='{{ task_colors|tojson }}'
-                    data-title="任务分布" height="300"></canvas>
-          </div>
+    <!-- 总体统计 -->
+    <div class="row mb-5">
+      {% set total_images = stats.values()|map(attribute='total_images')|sum %}
+      {% set total_defects = stats.values()|map(attribute='defect_images')|sum %}
+      <div class="col-md-4">
+        <div class="stat-card text-primary fade-in">
+          <div class="stat-value">{{ total_images }}</div>
+          <div class="stat-label">总检测图片</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card text-danger fade-in" style="animation-delay: 0.1s;">
+          <div class="stat-value">{{ total_defects }}</div>
+          <div class="stat-label">缺陷图片数</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card text-warning fade-in" style="animation-delay: 0.2s;">
+          {% set defect_rate = (total_defects / total_images * 100) if total_images > 0 else 0 %}
+          <div class="stat-value">{{ '%0.1f'|format(defect_rate) }}%</div>
+          <div class="stat-label">总体缺陷率</div>
         </div>
       </div>
     </div>
 
-    {% for t,data in class_charts.items() %}
-    <div class="row mt-4">
+    <!-- 任务分布 -->
+    <div class="row mb-5">
       <div class="col-md-12">
-        <div class="card fade-in" style="animation-delay: {{ loop.index * 0.1 }}s;">
+        <div class="card fade-in" style="animation-delay: 0.3s;">
           <div class="card-header">
-            <i class="fas fa-chart-pie mr-2"></i>{{ data.name_cn }}缺陷分布
-          </div>
-          <div class="card-body">
-            <canvas id="chart_{{ loop.index }}" data-chart="pie"
-                    data-values='{{ data.counts|tojson }}'
-                    data-colors='{{ data.colors|tojson }}'
-                    data-title="{{ data.name_cn }}缺陷分布" height="300"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-
-    <div class="row mt-4">
-      <div class="col-md-12">
-        <div class="card fade-in" style="animation-delay: 0.2s;">
-          <div class="card-header">
-            <i class="fas fa-images mr-2"></i>检测结果示例
+            <i class="fas fa-chart-pie mr-2"></i>产品类型分布
           </div>
           <div class="card-body">
             <div class="row">
-              {% for task, imgs in results_by_task.items() %}
-              <div class="col-md-3 mb-3" style="text-align:center;">
-                <h6 class="mb-2"><span class="badge badge-info">{{ task }}</span></h6>
-                {% for img in imgs[:2] %}
-                <img src="{{ url_for('static', filename='pred_vis/' + img) }}" class="img-fluid mb-2" alt="result">
-                {% endfor %}
+              <div class="col-md-6">
+                <div class="text-center">
+                  <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
+                </div>
               </div>
-              {% endfor %}
+              <div class="col-md-6">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>产品类型</th>
+                      <th class="text-center">图片数</th>
+                      <th class="text-center">缺陷数</th>
+                      <th class="text-center">缺陷率</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for task, stat in stats.items() %}
+                    {% if stat.total_images > 0 %}
+                    <tr>
+                      <td>
+                        <i class="fas fa-circle mr-2" style="color: {{ {'steel': '#e74c3c', 'phone': '#3498db', 'magnetic': '#2ecc71', 'solar-panel': '#9b59b6'}.get(task, '#95a5a6') }}"></i>
+                        {{ task_info.tasks[task].task_name_cn }}
+                      </td>
+                      <td class="text-center">{{ stat.total_images }}</td>
+                      <td class="text-center">{{ stat.defect_images }}</td>
+                      <td class="text-center">
+                        {{ '%0.1f'|format(stat.defect_images / stat.total_images * 100) if stat.total_images > 0 else 0 }}%
+                      </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="row mt-4">
+    <!-- 各任务缺陷分布 -->
+    {% for task, chart_data in class_charts.items() %}
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <div class="card fade-in" style="animation-delay: {{ 0.4 + loop.index0 * 0.1 }}s;">
+          <div class="card-header">
+            <i class="fas fa-chart-bar mr-2"></i>{{ chart_data.name_cn }}缺陷详情
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="text-center">
+                  <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h5 class="mb-3">缺陷类型统计</h5>
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>缺陷类型</th>
+                      <th class="text-center">数量</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for cls_name, count in class_counts[task].items() %}
+                    {% if count > 0 %}
+                    <tr>
+                      <td>
+                        <span class="defect-badge defect-{{ task }}-{{ loop.index }}">{{ cls_name }}</span>
+                      </td>
+                      <td class="text-center">{{ count }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- 分类存储信息（改进的文件夹视图） -->
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <div class="card fade-in" style="animation-delay: 0.7s;">
+          <div class="card-header">
+            <i class="fas fa-folder-open mr-2"></i>自动分类存储结果
+          </div>
+          <div class="card-body">
+            <p class="mb-4">
+              <i class="fas fa-check-circle text-success mr-2"></i>
+              系统已自动将检测结果按产品类型和缺陷类别分类存储，便于您后续查看和管理。
+            </p>
+
+            <div class="folder-structure">
+              <div class="folder-item">
+                <i class="fas fa-folder-open mr-2"></i>
+                <strong>auto_classify/</strong> <span class="text-muted">(智能分类结果)</span>
+              </div>
+
+              {% for task, stat in stats.items() %}
+              {% if stat.total_images > 0 %}
+              <div class="folder-item ml-4">
+                <div class="folder-header" onclick="toggleFolder('task-{{ task }}')">
+                  <i class="fas fa-folder mr-2"></i>
+                  <strong>{{ task_info.tasks[task].task_name_cn }}/</strong>
+                  <span class="badge badge-secondary">{{ stat.total_images }} 张</span>
+                  <i class="fas fa-chevron-down float-right"></i>
+                </div>
+
+                <div class="folder-content" id="task-{{ task }}" style="display: none;">
+                  <!-- 无缺陷文件夹 -->
+                  {% set no_defect = stat.total_images - stat.defect_images %}
+                  {% if no_defect > 0 %}
+                  <div class="folder-item ml-4">
+                    <div class="folder-subheader" onclick="toggleImages('no-defect-{{ task }}')">
+                      <i class="fas fa-folder mr-2 text-success"></i>
+                      <span>无缺陷/</span>
+                      <span class="badge badge-success">{{ no_defect }} 张</span>
+                      <i class="fas fa-images float-right"></i>
+                    </div>
+                    <div class="image-preview" id="no-defect-{{ task }}" style="display: none;">
+                      <p class="text-muted small mt-2">合格产品图片存储在此文件夹中</p>
+                    </div>
+                  </div>
+                  {% endif %}
+
+                  <!-- 各缺陷类型文件夹 -->
+                  {% for cls_name, count in class_counts[task].items() %}
+                  {% if count > 0 %}
+                  <div class="folder-item ml-4">
+                    <div class="folder-subheader" onclick="toggleImages('defect-{{ task }}-{{ loop.index }}')">
+                      <i class="fas fa-folder mr-2 text-warning"></i>
+                      <span>{{ cls_name }}/</span>
+                      <span class="badge badge-warning">{{ count }} 张</span>
+                      <i class="fas fa-images float-right"></i>
+                    </div>
+                    <div class="image-preview" id="defect-{{ task }}-{{ loop.index }}" style="display: none;">
+                      <div class="row mt-3">
+                        {% set imgs_found = false %}
+                        {% for cls_key, imgs in class_img_map[task].items() %}
+                          {% if imgs|length > 0 %}
+                            {% set imgs_found = true %}
+                            {% for img in imgs[:6] %}
+                            <div class="col-md-2 col-sm-4 mb-2">
+                              <div class="image-item-small">
+                                <img src="{{ url_for('static', filename='pred_vis/' + img) }}" class="img-fluid" alt="{{ img }}">
+                              </div>
+                            </div>
+                            {% endfor %}
+                            {% if imgs|length > 6 %}
+                            <div class="col-12">
+                              <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
+                            </div>
+                            {% endif %}
+                          {% endif %}
+                        {% endfor %}
+                        {% if not imgs_found %}
+                        <div class="col-12">
+                          <p class="text-muted small">图片已分类存储在对应文件夹中</p>
+                        </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+
+            <div class="alert alert-info mt-4">
+              <i class="fas fa-info-circle mr-2"></i>
+              <strong>存储路径：</strong>static/categorized/auto_classify/
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="row">
       <div class="col-md-12 text-center">
-        <a href="{{ url_for('download_report') }}" class="btn btn-primary mr-3">
-          <i class="fas fa-file-pdf mr-2"></i>下载报告
+        <a href="{{ url_for('download_report') }}" class="btn btn-primary btn-lg mr-3">
+          <i class="fas fa-file-pdf mr-2"></i>下载综合报告
         </a>
-        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary ml-3">
+        <a href="{{ url_for('classify_upload') }}" class="btn btn-outline-secondary btn-lg">
+          <i class="fas fa-redo mr-2"></i>继续检测
+        </a>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-primary btn-lg ml-3">
           <i class="fas fa-home mr-2"></i>返回首页
         </a>
       </div>
     </div>
   </div>
 
-  <footer class="bg-dark text-white py-4 mt-5">
+  <!-- 样式 -->
+  <style>
+    .folder-structure {
+      font-family: 'Consolas', 'Monaco', monospace;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .folder-item {
+      padding: 0.5rem 0;
+      line-height: 1.8;
+    }
+
+    .folder-header, .folder-subheader {
+      cursor: pointer;
+      transition: background-color 0.2s;
+      padding: 0.5rem;
+      border-radius: 4px;
+    }
+
+    .folder-header:hover, .folder-subheader:hover {
+      background-color: #e9ecef;
+    }
+
+    .folder-content {
+      margin-top: 0.5rem;
+      border-left: 2px solid #dee2e6;
+      margin-left: 1rem;
+    }
+
+    .folder-header i.fa-chevron-down {
+      transition: transform 0.3s;
+    }
+
+    .folder-header.open i.fa-chevron-down {
+      transform: rotate(180deg);
+    }
+
+    .image-preview {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #fff;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+    }
+
+    .image-item-small {
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .image-item-small:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+
+  <!-- 页脚 -->
+  <footer class="footer-gradient text-white py-4 mt-5">
     <div class="container text-center">
-      <p>表面缺陷检测系统 &copy; {{ current_year }}</p>
+      <p class="mb-0">工业表面缺陷智能检测系统 &copy; {{ current_year }}</p>
+      <small>Powered by Deep Learning Technology</small>
     </div>
   </footer>
 
+  <!-- 脚本 -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+    // 文件夹展开/收起
+    function toggleFolder(folderId) {
+      const folder = document.getElementById(folderId);
+      const header = folder.previousElementSibling;
+
+      if (folder.style.display === 'none') {
+        folder.style.display = 'block';
+        header.classList.add('open');
+      } else {
+        folder.style.display = 'none';
+        header.classList.remove('open');
+      }
+    }
+
+    // 图片预览展开/收起
+    function toggleImages(imageId) {
+      const imageDiv = document.getElementById(imageId);
+      if (imageDiv.style.display === 'none') {
+        imageDiv.style.display = 'block';
+      } else {
+        imageDiv.style.display = 'none';
+      }
+    }
+
+    // 创建任务分布饼图
+    const taskColors = {
+      'steel': 'rgba(231, 76, 60, 0.7)',
+      'phone': 'rgba(52, 152, 219, 0.7)',
+      'magnetic': 'rgba(46, 204, 113, 0.7)',
+      'solar-panel': 'rgba(155, 89, 182, 0.7)'
+    };
+
+    const taskCtx = document.getElementById('taskChart').getContext('2d');
+    const taskData = {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: [],
+        borderColor: [],
+        borderWidth: 2
+      }]
+    };
+
+    {% for task, stat in stats.items() %}
+    {% if stat.total_images > 0 %}
+    taskData.labels.push('{{ task_info.tasks[task].task_name_cn }}');
+    taskData.datasets[0].data.push({{ stat.total_images }});
+    taskData.datasets[0].backgroundColor.push(taskColors['{{ task }}'] || 'rgba(149, 165, 166, 0.7)');
+    taskData.datasets[0].borderColor.push(taskColors['{{ task }}']?.replace('0.7', '1') || 'rgba(149, 165, 166, 1)');
+    {% endif %}
+    {% endfor %}
+
+    new Chart(taskCtx, {
+      type: 'doughnut',
+      data: taskData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 15,
+              font: { size: 14 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                return `${label}: ${value} 张 (${percentage}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // 创建各任务的缺陷分布饼图
+    {% for task, chart_data in class_charts.items() %}
+    const ctx{{ task|replace('-', '_') }} = document.getElementById('defectChart-{{ task }}').getContext('2d');
+    const data{{ task|replace('-', '_') }} = {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: [],
+        borderColor: [],
+        borderWidth: 2
+      }]
+    };
+
+    {% for cls_name, count in class_counts[task].items() %}
+    {% if count > 0 %}
+    data{{ task|replace('-', '_') }}.labels.push('{{ cls_name }}');
+    data{{ task|replace('-', '_') }}.datasets[0].data.push({{ count }});
+
+    // 分配颜色
+    {% if task == 'steel' %}
+      {% if loop.index == 1 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(255, 99, 132, 0.7)');
+      {% elif loop.index == 2 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(75, 192, 192, 0.7)');
+      {% elif loop.index == 3 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(54, 162, 235, 0.7)');
+      {% elif loop.index == 4 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(255, 206, 86, 0.7)');
+      {% endif %}
+    {% elif task == 'phone' %}
+      {% if loop.index == 1 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(153, 102, 255, 0.7)');
+      {% elif loop.index == 2 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(255, 159, 64, 0.7)');
+      {% elif loop.index == 3 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(75, 192, 192, 0.7)');
+      {% endif %}
+    {% elif task == 'magnetic' %}
+      {% if loop.index == 1 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(255, 99, 132, 0.7)');
+      {% elif loop.index == 2 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(75, 192, 192, 0.7)');
+      {% elif loop.index == 3 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(54, 162, 235, 0.7)');
+      {% elif loop.index == 4 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(255, 206, 86, 0.7)');
+      {% elif loop.index == 5 %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(153, 102, 255, 0.7)');
+      {% endif %}
+    {% elif task == 'solar-panel' %}
+      const hue = ({{ loop.index0 }} * 360 / {{ class_counts[task]|length }}) % 360;
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+    {% else %}
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.push('rgba(201, 203, 207, 0.7)');
+    {% endif %}
+
+    data{{ task|replace('-', '_') }}.datasets[0].borderColor.push(
+      data{{ task|replace('-', '_') }}.datasets[0].backgroundColor[data{{ task|replace('-', '_') }}.datasets[0].backgroundColor.length - 1].replace('0.7', '1')
+    );
+    {% endif %}
+    {% endfor %}
+
+    new Chart(ctx{{ task|replace('-', '_') }}, {
+      type: 'doughnut',
+      data: data{{ task|replace('-', '_') }},
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 10,
+              font: { size: 12 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                return `${label}: ${value} 张 (${percentage}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+    {% endfor %}
+
+    // 启用工具提示
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    });
+  </script>
 </body>
 </html>

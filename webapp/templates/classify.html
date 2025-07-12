@@ -3,51 +3,338 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>自动分类检测</title>
+  <title>智能分类检测 - 工业表面缺陷检测系统</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar">
     <div class="container">
       <a class="navbar-brand" href="{{ url_for('index') }}">
-        <i class="fas fa-industry mr-2"></i>表面缺陷检测系统
+        <i class="fas fa-microscope mr-2"></i>工业表面缺陷智能检测系统
       </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">首页</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">智能分类检测</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
-  <div class="container py-5">
-    <h1>自动分类并分割</h1>
-    <div class="card fade-in">
-      <div class="card-body">
-        <form action="{{ url_for('start_classify') }}" method="POST" enctype="multipart/form-data">
-          <div class="form-group">
-            <label>上传图像文件</label>
-            <div class="custom-file">
-              <input type="file" class="custom-file-input" name="images" multiple webkitdirectory directory required>
-              <label class="custom-file-label">选择文件</label>
+  <!-- 页面头部 -->
+  <section class="hero-section py-5">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <h1 class="display-4 font-weight-bold text-white mb-4">
+            <i class="fas fa-magic mr-3"></i>智能分类检测
+          </h1>
+          <p class="lead text-white-80 mb-4">
+            无需手动选择产品类型，系统自动识别图片类别并选择最合适的检测模型，一键完成多种产品的缺陷检测
+          </p>
+          <div class="feature-highlights">
+            <div class="highlight-item">
+              <i class="fas fa-brain"></i>
+              <span>智能识别</span>
             </div>
-            <div class="mt-2">
-              <small class="form-text text-muted">可一次上传多张图像，系统将自动分类后进行分割</small>
+            <div class="highlight-item">
+              <i class="fas fa-rocket"></i>
+              <span>一键检测</span>
+            </div>
+            <div class="highlight-item">
+              <i class="fas fa-layer-group"></i>
+              <span>多类支持</span>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary mt-3">
-            <i class="fas fa-magic mr-2"></i>开始处理
-          </button>
-        </form>
+        </div>
+        <div class="col-lg-6 text-center">
+          <img src="{{ url_for('static', filename='images/ai-classify.svg') }}" alt="智能分类" class="img-fluid" style="max-width: 400px;">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 主内容 -->
+  <div class="container py-5">
+    <!-- 上传区域 -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-8">
+        <div class="card shadow-lg fade-in">
+          <div class="card-body p-5">
+            <h3 class="text-center mb-4">
+              <i class="fas fa-cloud-upload-alt mr-2"></i>上传图片
+            </h3>
+
+            <form action="{{ url_for('start_classify') }}" method="POST" enctype="multipart/form-data">
+              <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                  <i class="fas fa-images"></i>
+                </div>
+                <h4>拖拽文件到此处或点击选择</h4>
+                <p class="text-muted">支持批量上传多种类型的产品图片</p>
+
+                <div class="custom-file mt-4">
+                  <input type="file" class="custom-file-input" id="multiFiles" name="images"
+                         multiple webkitdirectory directory required>
+                  <label class="custom-file-label" for="multiFiles">选择文件夹</label>
+                </div>
+              </div>
+
+              <div id="fileInfo" class="mt-4" style="display: none;">
+                <div class="alert alert-info">
+                  <i class="fas fa-info-circle mr-2"></i>
+                  已选择 <strong id="fileCount">0</strong> 个文件
+                  <span id="fileSize" class="ml-3"></span>
+                </div>
+
+                <div id="filePreview" class="file-preview mt-3"></div>
+              </div>
+
+              <button type="submit" class="btn btn-success btn-lg btn-block mt-4" id="submitBtn" disabled>
+                <i class="fas fa-magic mr-2"></i>开始智能检测
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 功能说明 -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card fade-in" style="animation-delay: 0.2s;">
+          <div class="card-header">
+            <i class="fas fa-star mr-2"></i>功能特点
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <div class="feature-item text-center">
+                  <div class="feature-icon mb-3">
+                    <i class="fas fa-robot"></i>
+                  </div>
+                  <h5>自动识别</h5>
+                  <p class="text-muted">基于深度学习的分类器，自动识别钢铁、手机屏幕、磁瓦、太阳能板等产品类型</p>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="feature-item text-center">
+                  <div class="feature-icon mb-3">
+                    <i class="fas fa-bullseye"></i>
+                  </div>
+                  <h5>精准检测</h5>
+                  <p class="text-muted">为每种产品类型配备专门的检测模型，确保最佳的检测效果</p>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="feature-item text-center">
+                  <div class="feature-icon mb-3">
+                    <i class="fas fa-chart-line"></i>
+                  </div>
+                  <h5>综合分析</h5>
+                  <p class="text-muted">生成详细的分类统计和缺陷分析报告，支持导出PDF文档</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 支持的产品类型 -->
+    <div class="row mt-5">
+      <div class="col-md-12">
+        <div class="card fade-in" style="animation-delay: 0.3s;">
+          <div class="card-header">
+            <i class="fas fa-th-large mr-2"></i>支持的产品类型
+          </div>
+          <div class="card-body">
+            <div class="row">
+              {% for task_key, task_detail in task_info.tasks.items() %}
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div class="product-type-card">
+                  <div class="product-icon">
+                    {% if task_key == 'steel' %}
+                      <i class="fas fa-industry"></i>
+                    {% elif task_key == 'phone' %}
+                      <i class="fas fa-mobile-alt"></i>
+                    {% elif task_key == 'magnetic' %}
+                      <i class="fas fa-magnet"></i>
+                    {% elif task_key == 'solar-panel' %}
+                      <i class="fas fa-solar-panel"></i>
+                    {% endif %}
+                  </div>
+                  <h6>{{ task_detail.task_name_cn }}</h6>
+                  <p class="text-muted small mb-0">{{ task_detail.class_names|length }} 种缺陷类型</p>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <footer class="bg-dark text-white py-4 mt-5">
+  <!-- 页脚 -->
+  <footer class="footer-gradient text-white py-4 mt-5">
     <div class="container text-center">
-      <p>表面缺陷检测系统 &copy; {{ current_year }}</p>
+      <p class="mb-0">工业表面缺陷智能检测系统 &copy; {{ current_year }}</p>
+      <small>Powered by Deep Learning Technology</small>
     </div>
   </footer>
 
+  <!-- 样式 -->
+  <style>
+    .feature-highlights {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .highlight-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .highlight-item i {
+      font-size: 1.5rem;
+      opacity: 0.9;
+    }
+
+    .upload-area {
+      border: 3px dashed #ddd;
+      border-radius: 12px;
+      padding: 3rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .upload-area:hover {
+      border-color: var(--accent);
+      background-color: #f8f9fa;
+    }
+
+    .upload-area.dragover {
+      border-color: var(--success);
+      background-color: #e8f5e9;
+    }
+
+    .upload-icon {
+      font-size: 4rem;
+      color: var(--gray);
+      margin-bottom: 1rem;
+    }
+
+    .file-preview {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 1rem;
+    }
+
+    .feature-item .feature-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+    }
+
+    .product-type-card {
+      text-align: center;
+      padding: 1.5rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .product-type-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .product-icon {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+  </style>
+
+  <!-- 脚本 -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+    // 文件上传处理
+    const fileInput = document.getElementById('multiFiles');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileCount = document.getElementById('fileCount');
+    const fileSize = document.getElementById('fileSize');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadArea = document.getElementById('uploadArea');
+
+    fileInput.addEventListener('change', function(e) {
+      const files = e.target.files;
+      if (files.length > 0) {
+        fileCount.textContent = files.length;
+
+        // 计算总大小
+        let totalSize = 0;
+        for (let i = 0; i < files.length; i++) {
+          totalSize += files[i].size;
+        }
+        fileSize.textContent = `总大小: ${(totalSize / (1024 * 1024)).toFixed(2)} MB`;
+
+        fileInfo.style.display = 'block';
+        submitBtn.disabled = false;
+
+        // 更新文件标签
+        document.querySelector('.custom-file-label').textContent = `已选择 ${files.length} 个文件`;
+      }
+    });
+
+    // 拖拽上传
+    uploadArea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+      // 注意：文件夹拖拽在Web中的支持有限
+    });
+
+    // 点击区域触发文件选择
+    uploadArea.addEventListener('click', function(e) {
+      if (e.target.closest('.custom-file')) return;
+      fileInput.click();
+    });
+  </script>
 </body>
 </html>

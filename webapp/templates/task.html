@@ -3,78 +3,229 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ task }} 检测</title>
+  <title>{{ task_info.task_name_cn }}检测 - 工业表面缺陷检测系统</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar">
     <div class="container">
       <a class="navbar-brand" href="{{ url_for('index') }}">
-        <i class="fas fa-industry mr-2"></i>表面缺陷检测系统
+        <i class="fas fa-microscope mr-2"></i>工业表面缺陷智能检测系统
       </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">首页</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">{{ task_info.task_name_cn }}</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
-  <div class="container py-5">
-    <h1>{{ task }} 缺陷检测</h1>
-    <div class="row">
-      <div class="col-lg-6 mb-4">
-        <div class="card h-100 fade-in">
-          <div class="card-header d-flex align-items-center">
-            <i class="fas fa-image mr-2"></i>
-            <span>单张图像检测</span>
-          </div>
-          <div class="card-body">
-            <form action="{{ url_for('task_single', task=task) }}" method="POST" enctype="multipart/form-data">
-              <div class="form-group">
-                <label for="singleFile">选择需要检测的图像文件</label>
-                <div class="custom-file">
-                  <input type="file" class="custom-file-input" id="singleFile" name="image" accept="image/*" required>
-                  <label class="custom-file-label" for="singleFile">选择文件</label>
-                </div>
-              </div>
-              <button type="submit" class="btn btn-primary mt-3">
-                <i class="fas fa-search mr-2"></i>开始检测
-              </button>
-            </form>
+  <!-- 任务头部 -->
+  <section class="task-header py-5">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <h1 class="display-4 font-weight-bold mb-3">
+            {% if task == 'steel' %}
+              <i class="fas fa-industry mr-3"></i>
+            {% elif task == 'phone' %}
+              <i class="fas fa-mobile-alt mr-3"></i>
+            {% elif task == 'magnetic' %}
+              <i class="fas fa-magnet mr-3"></i>
+            {% elif task == 'solar-panel' %}
+              <i class="fas fa-solar-panel mr-3"></i>
+            {% endif %}
+            {{ task_info.task_name_cn }}检测
+          </h1>
+          <p class="lead">
+            专业检测{{ task_info.task_name_cn }}中的各类缺陷，支持单张和批量检测
+          </p>
+        </div>
+        <div class="col-lg-4">
+          <div class="task-stats">
+            <div class="stat-item">
+              <i class="fas fa-layer-group"></i>
+              <span>{{ task_info.class_names|length }} 种缺陷类型</span>
+            </div>
+            <div class="stat-item">
+              <i class="fas fa-bolt"></i>
+              <span>实时检测</span>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-lg-6 mb-4">
-        <div class="card h-100 fade-in" style="animation-delay: 0.1s;">
-          <div class="card-header d-flex align-items-center">
-            <i class="fas fa-images mr-2"></i>
-            <span>批量图像检测</span>
+    </div>
+  </section>
+
+  <!-- 主内容 -->
+  <div class="container py-5">
+    <!-- 缺陷类型说明 -->
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <div class="card fade-in">
+          <div class="card-header">
+            <i class="fas fa-info-circle mr-2"></i>可检测的缺陷类型
           </div>
           <div class="card-body">
-            <form action="{{ url_for('start_batch', task=task) }}" method="POST" enctype="multipart/form-data">
-              <div class="form-group">
-                <label>选择多个图像文件</label>
-                <div class="custom-file">
-                  <input type="file" class="custom-file-input" name="images" multiple webkitdirectory directory required>
-                  <label class="custom-file-label">选择文件</label>
+            <div class="row">
+              {% for cls_id, cls_info in task_info.class_names.items() %}
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div class="defect-type-item">
+                  <span class="defect-badge defect-{{ task }}-{{ cls_id }}">
+                    {{ cls_info.cn }}
+                  </span>
+                  <small class="text-muted d-block mt-1">{{ cls_info.en }}</small>
                 </div>
               </div>
-              <button type="submit" class="btn btn-success mt-3">
-                <i class="fas fa-play mr-2"></i>开始批量检测
-              </button>
-            </form>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 检测选项 -->
+    <div class="row">
+      <!-- 单张检测 -->
+      <div class="col-lg-6 mb-4">
+        <div class="feature-card h-100 fade-in" style="animation-delay: 0.1s;">
+          <div class="card-icon">
+            <i class="fas fa-image"></i>
+          </div>
+          <h4 class="card-title">单张图像检测</h4>
+          <p class="card-description">上传单张图片进行快速检测，实时查看检测结果</p>
+
+          <form action="{{ url_for('task_single', task=task) }}" method="POST" enctype="multipart/form-data" class="mt-4">
+            <div class="form-group">
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="singleFile" name="image" accept="image/*" required>
+                <label class="custom-file-label" for="singleFile">选择图片文件</label>
+              </div>
+              <small class="form-text text-muted mt-2">
+                支持格式：JPG、PNG、BMP | 建议大小：小于10MB
+              </small>
+            </div>
+
+            <!-- 图片预览 -->
+            <div class="image-preview-container" style="display: none;">
+              <img id="singlePreview" class="img-fluid rounded" alt="预览">
+            </div>
+
+            <button type="submit" class="btn btn-gradient btn-block">
+              <i class="fas fa-search mr-2"></i>开始检测
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 批量检测 -->
+      <div class="col-lg-6 mb-4">
+        <div class="feature-card h-100 fade-in" style="animation-delay: 0.2s;">
+          <div class="card-icon" style="background: linear-gradient(135deg, var(--success) 0%, #68d391 100%);">
+            <i class="fas fa-images"></i>
+          </div>
+          <h4 class="card-title">批量图像检测</h4>
+          <p class="card-description">选择文件夹批量上传，自动处理并生成统计报告</p>
+
+          <form action="{{ url_for('start_batch', task=task) }}" method="POST" enctype="multipart/form-data" class="mt-4">
+            <div class="form-group">
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="batchFiles" name="images" multiple webkitdirectory directory required>
+                <label class="custom-file-label" for="batchFiles">选择文件夹</label>
+              </div>
+              <small class="form-text text-muted mt-2">
+                支持批量上传 | 建议：少于100张图片
+              </small>
+            </div>
+
+            <div id="fileCount" class="alert alert-info" style="display: none;">
+              已选择 <span id="fileNumber">0</span> 个文件
+            </div>
+
+            <button type="submit" class="btn btn-success btn-block">
+              <i class="fas fa-play mr-2"></i>开始批量检测
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 使用说明 -->
+    <div class="row mt-5">
+      <div class="col-md-12">
+        <div class="card fade-in" style="animation-delay: 0.3s;">
+          <div class="card-header">
+            <i class="fas fa-question-circle mr-2"></i>使用说明
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+                <h6><i class="fas fa-upload text-primary mr-2"></i>上传图片</h6>
+                <p class="text-muted small">选择需要检测的{{ task_info.task_name_cn }}图片，支持常见图片格式</p>
+              </div>
+              <div class="col-md-4">
+                <h6><i class="fas fa-cog text-success mr-2"></i>自动检测</h6>
+                <p class="text-muted small">系统自动识别并标注各类缺陷，使用不同颜色区分</p>
+              </div>
+              <div class="col-md-4">
+                <h6><i class="fas fa-chart-bar text-warning mr-2"></i>查看结果</h6>
+                <p class="text-muted small">可视化展示检测结果，提供详细的统计分析报告</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <footer class="bg-dark text-white py-4 mt-5">
+  <!-- 页脚 -->
+  <footer class="footer-gradient text-white py-4 mt-5">
     <div class="container text-center">
-      <p>表面缺陷检测系统 &copy; {{ current_year }}</p>
+      <p class="mb-0">工业表面缺陷智能检测系统 &copy; {{ current_year }}</p>
+      <small>Powered by Deep Learning Technology</small>
     </div>
   </footer>
 
+  <!-- 脚本 -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+    // 单张图片预览
+    document.getElementById('singleFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('singlePreview');
+          const container = document.querySelector('.image-preview-container');
+          preview.src = e.target.result;
+          container.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // 批量文件计数
+    document.getElementById('batchFiles').addEventListener('change', function(e) {
+      const fileCount = e.target.files.length;
+      if (fileCount > 0) {
+        document.getElementById('fileNumber').textContent = fileCount;
+        document.getElementById('fileCount').style.display = 'block';
+      }
+    });
+  </script>
 </body>
 </html>

@@ -3,63 +3,382 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>表面缺陷检测系统</title>
+  <title>工业表面缺陷智能检测系统</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar">
     <div class="container">
       <a class="navbar-brand" href="{{ url_for('index') }}">
-        <i class="fas fa-industry mr-2"></i>表面缺陷检测系统
+        <i class="fas fa-microscope mr-2"></i>工业表面缺陷智能检测系统
       </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#home">首页</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#features">功能特点</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#about">系统说明</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
-  <div class="container py-5">
-    <div class="row mb-4">
-      <div class="col-md-12 text-center">
-        <h1>自动缺陷检测与分析</h1>
-        <p class="lead">通过人工智能技术识别表面的夹杂物、补丁、划痕和其他缺陷</p>
-      </div>
-    </div>
-
-    <div class="row">
-      {% for t in tasks %}
-      <div class="col-md-3 mb-4">
-        <div class="card h-100 fade-in">
-          <div class="card-header text-center">
-            <i class="fas fa-project-diagram mr-2"></i>{{ t }}
+  <!-- 英雄区域 -->
+  <section class="hero-section" id="home">
+    <div class="container">
+      <div class="row align-items-center min-vh-50">
+        <div class="col-lg-6">
+          <h1 class="display-4 font-weight-bold mb-4 text-white">
+            工业表面缺陷<br>智能检测系统
+          </h1>
+          <p class="lead text-white-80 mb-4">
+            采用先进的深度学习技术，支持钢铁、手机屏幕、磁瓦、太阳能板等多种工业产品的表面缺陷自动检测与分类
+          </p>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <i class="fas fa-layer-group"></i>
+              <div>
+                <h4>4+</h4>
+                <p>检测场景</p>
+              </div>
+            </div>
+            <div class="stat-item">
+              <i class="fas fa-bullseye"></i>
+              <div>
+                <h4>95%+</h4>
+                <p>检测精度</p>
+              </div>
+            </div>
+            <div class="stat-item">
+              <i class="fas fa-tachometer-alt"></i>
+              <div>
+                <h4>实时</h4>
+                <p>检测速度</p>
+              </div>
+            </div>
           </div>
-          <div class="card-body d-flex flex-column">
-            <p class="flex-fill">使用该类别模型进行缺陷分割</p>
-            <a href="{{ url_for('task_page', task=t) }}" class="btn btn-primary mt-auto">进入</a>
+        </div>
+        <div class="col-lg-6">
+          <div class="hero-image text-center">
+            <i class="fas fa-industry hero-icon"></i>
           </div>
         </div>
       </div>
-      {% endfor %}
+    </div>
+  </section>
 
-      <div class="col-md-3 mb-4">
-        <div class="card h-100 fade-in" style="animation-delay: 0.1s;">
-          <div class="card-header text-center">
-            <i class="fas fa-magic mr-2"></i>自动分类检测
+  <!-- 功能卡片区域 -->
+  <section class="py-5" id="features">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="section-title">选择检测模式</h2>
+        <p class="section-subtitle">根据您的需求选择合适的检测方式</p>
+      </div>
+
+      <div class="row">
+        <!-- 自动分类检测卡片（放在最前面） -->
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="feature-card special-card h-100 fade-in">
+            <div class="card-ribbon">推荐</div>
+            <div class="card-icon">
+              <i class="fas fa-magic"></i>
+            </div>
+            <h4 class="card-title">智能分类检测</h4>
+            <p class="card-description">
+              自动识别图片类型并选择对应的检测模型，无需手动选择，一键完成多类型产品检测
+            </p>
+            <div class="mt-auto">
+              <a href="{{ url_for('classify_upload') }}" class="btn btn-success btn-block">
+                <i class="fas fa-bolt mr-2"></i>智能检测
+              </a>
+            </div>
           </div>
-          <div class="card-body d-flex flex-column">
-            <p class="flex-fill">上传图片自动识别类别并完成分割</p>
-            <a href="{{ url_for('classify_upload') }}" class="btn btn-success mt-auto">开始</a>
+        </div>
+
+        <!-- 各任务卡片 -->
+        {% for t in tasks %}
+        {% set task_detail = task_info.tasks.get(t, {}) %}
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="feature-card h-100 fade-in" style="animation-delay: {{ loop.index * 0.1 }}s;">
+            <div class="card-icon">
+              {% if t == 'steel' %}
+                <i class="fas fa-industry"></i>
+              {% elif t == 'phone' %}
+                <i class="fas fa-mobile-alt"></i>
+              {% elif t == 'magnetic' %}
+                <i class="fas fa-magnet"></i>
+              {% elif t == 'solar-panel' %}
+                <i class="fas fa-solar-panel"></i>
+              {% else %}
+                <i class="fas fa-cog"></i>
+              {% endif %}
+            </div>
+            <h4 class="card-title">{{ task_detail.task_name_cn }}</h4>
+            <p class="card-description">
+              检测{{ task_detail.task_name_cn }}中的
+              {% set class_list = [] %}
+              {% for cls_id, cls_info in task_detail.class_names.items() %}
+                {% if class_list.append(cls_info.cn) %}{% endif %}
+              {% endfor %}
+              {{ class_list[:3]|join('、') }}{% if class_list|length > 3 %}等{% endif %}缺陷
+            </p>
+            <div class="mt-auto">
+              <a href="{{ url_for('task_page', task=t) }}" class="btn btn-gradient btn-block">
+                <i class="fas fa-arrow-right mr-2"></i>进入检测
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- 系统性能指标 -->
+  <section class="system-performance py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="section-title">系统性能</h2>
+        <p class="section-subtitle">基于深度学习的高精度检测</p>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <div class="performance-card">
+            <h5 class="mb-4"><i class="fas fa-chart-line mr-2"></i>语义分割精度 (Dice Score)</h5>
+            <div class="performance-items">
+              <div class="performance-item">
+                <span class="label">钢铁表面</span>
+                <div class="progress">
+                  <div class="progress-bar bg-danger" style="width: 93%">0.93</div>
+                </div>
+              </div>
+              <div class="performance-item">
+                <span class="label">磁瓦</span>
+                <div class="progress">
+                  <div class="progress-bar bg-success" style="width: 92%">0.92</div>
+                </div>
+              </div>
+              <div class="performance-item">
+                <span class="label">太阳能板</span>
+                <div class="progress">
+                  <div class="progress-bar bg-purple" style="width: 91%">0.91</div>
+                </div>
+              </div>
+              <div class="performance-item">
+                <span class="label">手机屏幕</span>
+                <div class="progress">
+                  <div class="progress-bar bg-info" style="width: 78%">0.78</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+          <div class="performance-card">
+            <h5 class="mb-4"><i class="fas fa-bullseye mr-2"></i>分类模型性能</h5>
+            <div class="text-center py-4">
+              <div class="circular-progress">
+                <div class="progress-value">
+                  <h2 class="mb-0">0.99</h2>
+                  <p class="mb-0">F1 Score</p>
+                </div>
+              </div>
+              <p class="mt-3 text-muted">自动识别产品类型准确率极高</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <footer class="bg-dark text-white py-4 mt-5">
+  <!-- 系统说明 -->
+  <section class="system-info py-5 bg-light" id="about">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="section-title">系统说明</h2>
+        <p class="section-subtitle">了解系统功能与使用方法</p>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-tasks"></i>
+            </div>
+            <h5>支持的检测类型</h5>
+            <ul class="feature-list">
+              <li><i class="fas fa-check-circle"></i> 钢铁表面：夹杂物、补丁、划痕等</li>
+              <li><i class="fas fa-check-circle"></i> 手机屏幕：油污、划痕、污点</li>
+              <li><i class="fas fa-check-circle"></i> 磁瓦：气孔、断裂、裂纹、磨损</li>
+              <li><i class="fas fa-check-circle"></i> 太阳能板：29种缺陷与特征</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <h5>使用流程</h5>
+            <ul class="feature-list">
+              <li><i class="fas fa-arrow-circle-right"></i> 选择检测模式（指定类型/智能分类）</li>
+              <li><i class="fas fa-arrow-circle-right"></i> 上传单张或批量图片</li>
+              <li><i class="fas fa-arrow-circle-right"></i> 系统自动检测并标注缺陷</li>
+              <li><i class="fas fa-arrow-circle-right"></i> 查看结果统计与可视化</li>
+              <li><i class="fas fa-arrow-circle-right"></i> 下载检测报告</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="info-card">
+            <div class="info-icon">
+              <i class="fas fa-chart-pie"></i>
+            </div>
+            <h5>结果分析</h5>
+            <ul class="feature-list">
+              <li><i class="fas fa-chart-bar"></i> 缺陷统计分析</li>
+              <li><i class="fas fa-images"></i> 可视化标注结果</li>
+              <li><i class="fas fa-folder-open"></i> 自动分类存储</li>
+              <li><i class="fas fa-file-pdf"></i> PDF报告生成</li>
+              <li><i class="fas fa-palette"></i> 直观的颜色编码系统</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-5">
+        <div class="col-md-12">
+          <div class="tech-info">
+            <h5 class="mb-3"><i class="fas fa-microchip mr-2"></i>技术特点</h5>
+            <div class="tech-badges">
+              <span class="badge badge-tech">深度学习</span>
+              <span class="badge badge-tech">U-Net架构</span>
+              <span class="badge badge-tech">EfficientNet-B4</span>
+              <span class="badge badge-tech">对比学习</span>
+              <span class="badge badge-tech">实时检测</span>
+              <span class="badge badge-tech">高精度分割</span>
+              <span class="badge badge-tech">多任务学习</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer class="footer-gradient text-white py-4 mt-0">
     <div class="container text-center">
-        <p>表面缺陷检测系统 &copy; {{ current_year }}</p>
+      <p class="mb-0">工业表面缺陷智能检测系统 &copy; {{ current_year }}</p>
+      <small>Powered by Deep Learning Technology</small>
     </div>
   </footer>
 
+  <!-- 添加样式 -->
+  <style>
+    .hero-icon {
+      font-size: 15rem;
+      color: rgba(255, 255, 255, 0.2);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-30px); }
+    }
+
+    .system-performance {
+      background-color: #f8fafc;
+    }
+
+    .performance-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      height: 100%;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .performance-item {
+      margin-bottom: 1.5rem;
+    }
+
+    .performance-item .label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .performance-item .progress {
+      height: 25px;
+      border-radius: 12px;
+      background-color: #e2e8f0;
+    }
+
+    .performance-item .progress-bar {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bg-purple {
+      background-color: #9b59b6 !important;
+    }
+
+    .circular-progress {
+      display: inline-block;
+      position: relative;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: conic-gradient(#48bb78 0deg, #48bb78 356deg, #e2e8f0 356deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .circular-progress::before {
+      content: '';
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: white;
+    }
+
+    .progress-value {
+      position: relative;
+      text-align: center;
+    }
+
+    .progress-value h2 {
+      color: #48bb78;
+      font-weight: 700;
+    }
+
+    .progress-value p {
+      color: #718096;
+      font-size: 0.9rem;
+    }
+  </style>
+
+  <!-- 脚本 -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>

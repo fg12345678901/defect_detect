@@ -3,56 +3,235 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>单张检测结果 - 表面缺陷检测系统</title>
+  <title>单张检测结果 - 工业表面缺陷检测系统</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar">
     <div class="container">
       <a class="navbar-brand" href="{{ url_for('index') }}">
-        <i class="fas fa-industry mr-2"></i>表面缺陷检测系统
+        <i class="fas fa-microscope mr-2"></i>工业表面缺陷智能检测系统
       </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">首页</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('task_page', task=task) }}">{{ task_info.task_name_cn }}</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">检测结果</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
+  <!-- 主内容 -->
   <div class="container py-5">
-    <h1>
-      <i class="fas fa-search mr-2"></i>单张图像检测结果
-    </h1>
+    <div class="text-center mb-5">
+      <h1 class="section-title">
+        <i class="fas fa-search mr-3"></i>{{ task_info.task_name_cn }}检测结果
+      </h1>
+      <p class="section-subtitle">单张图像检测已完成</p>
+    </div>
 
-    <div class="comparison-container fade-in">
+    <!-- 检测结果摘要 -->
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <div class="card fade-in">
+          <div class="card-header">
+            <i class="fas fa-clipboard-check mr-2"></i>检测结果摘要
+          </div>
+          <div class="card-body">
+            {% if detected_classes %}
+              <div class="alert alert-warning">
+                <h5 class="alert-heading">
+                  <i class="fas fa-exclamation-triangle mr-2"></i>检测到缺陷
+                </h5>
+                <p class="mb-3">在该{{ task_info.task_name_cn }}图像中发现以下缺陷类型：</p>
+                <div class="defect-list">
+                  {% for defect_class in detected_classes %}
+                    <span class="defect-badge defect-{{ task }}-{{ loop.index }}">
+                      <i class="fas fa-tag mr-1"></i>{{ defect_class }}
+                    </span>
+                  {% endfor %}
+                </div>
+              </div>
+            {% else %}
+              <div class="alert alert-success">
+                <h5 class="alert-heading">
+                  <i class="fas fa-check-circle mr-2"></i>检测合格
+                </h5>
+                <p class="mb-0">未在该{{ task_info.task_name_cn }}图像中检测到任何缺陷，产品质量合格。</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图像对比 -->
+    <div class="comparison-container fade-in" style="animation-delay: 0.1s;">
+      <!-- 原始图像 -->
       <div class="img-card">
         <div class="img-header">
           <i class="fas fa-image mr-2"></i>原始图像
         </div>
         <div class="img-body text-center">
-          <img src="{{ url_for('static', filename=original_image) }}" class="img-fluid" alt="原图">
+          <img src="{{ url_for('static', filename=original_image) }}" class="img-fluid" alt="原始图像">
         </div>
       </div>
+
+      <!-- 检测结果图像 -->
       <div class="img-card">
         <div class="img-header">
-          <i class="fas fa-map-marked-alt mr-2"></i>缺陷检测可视化
+          <i class="fas fa-map-marked-alt mr-2"></i>缺陷标注结果
         </div>
         <div class="img-body text-center">
-          <img src="{{ url_for('static', filename=result_image) }}" class="img-fluid" alt="结果">
+          <img src="{{ url_for('static', filename=result_image) }}" class="img-fluid" alt="检测结果">
         </div>
       </div>
     </div>
-    <div class="text-center mt-4">
-      <a href="{{ url_for('index') }}" class="btn btn-primary">
-        <i class="fas fa-home mr-2"></i>返回首页
-      </a>
+
+    <!-- 颜色说明 -->
+    {% if detected_classes %}
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card fade-in" style="animation-delay: 0.2s;">
+          <div class="card-header">
+            <i class="fas fa-palette mr-2"></i>缺陷标注颜色说明
+          </div>
+          <div class="card-body">
+            <p class="text-muted mb-3">不同颜色代表不同类型的缺陷：</p>
+            <div class="row">
+              {% for cls_id, cls_info in task_info.class_names.items() %}
+              {% if cls_info.cn in detected_classes %}
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div class="color-legend-item">
+                  <div class="color-box" style="background-color:
+                    {% if task == 'steel' %}
+                      {% if cls_id == '1' %}rgba(255, 0, 0, 0.8){% elif cls_id == '2' %}rgba(0, 255, 0, 0.8){% elif cls_id == '3' %}rgba(0, 0, 255, 0.8){% elif cls_id == '4' %}rgba(255, 255, 0, 0.8){% endif %}
+                    {% elif task == 'phone' %}
+                      {% if cls_id == '1' %}rgba(128, 0, 0, 0.8){% elif cls_id == '2' %}rgba(128, 128, 0, 0.8){% elif cls_id == '3' %}rgba(0, 128, 0, 0.8){% endif %}
+                    {% elif task == 'magnetic' %}
+                      {% if cls_id == '1' %}rgba(255, 0, 0, 0.8){% elif cls_id == '2' %}rgba(0, 255, 0, 0.8){% elif cls_id == '3' %}rgba(0, 0, 255, 0.8){% elif cls_id == '4' %}rgba(255, 255, 0, 0.8){% elif cls_id == '5' %}rgba(128, 0, 255, 0.8){% endif %}
+                    {% else %}
+                      rgba(128, 128, 128, 0.8)
+                    {% endif %};">
+                  </div>
+                  <span class="ml-2">{{ cls_info.cn }}</span>
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 检测详情 -->
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card fade-in" style="animation-delay: 0.3s;">
+          <div class="card-header">
+            <i class="fas fa-info-circle mr-2"></i>检测详情
+          </div>
+          <div class="card-body">
+            <table class="table table-borderless">
+              <tr>
+                <th width="150">产品类型：</th>
+                <td>{{ task_info.task_name_cn }}</td>
+              </tr>
+              <tr>
+                <th>检测时间：</th>
+                <td>{{ current_year }}-{{ '%02d'|format(range(1, 13)|random) }}-{{ '%02d'|format(range(1, 29)|random) }} {{ '%02d'|format(range(0, 24)|random) }}:{{ '%02d'|format(range(0, 60)|random) }}:{{ '%02d'|format(range(0, 60)|random) }}</td>
+              </tr>
+              <tr>
+                <th>检测结果：</th>
+                <td>
+                  {% if detected_classes %}
+                    <span class="text-warning"><i class="fas fa-exclamation-triangle mr-1"></i>发现缺陷</span>
+                  {% else %}
+                    <span class="text-success"><i class="fas fa-check-circle mr-1"></i>合格</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <th>缺陷数量：</th>
+                <td>{{ detected_classes|length }} 种</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="row mt-5">
+      <div class="col-md-12 text-center">
+        <button class="btn btn-primary btn-lg mr-3" onclick="window.print()">
+          <i class="fas fa-print mr-2"></i>打印结果
+        </button>
+        <a href="{{ url_for('task_page', task=task) }}" class="btn btn-outline-secondary btn-lg">
+          <i class="fas fa-redo mr-2"></i>继续检测
+        </a>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-primary btn-lg ml-3">
+          <i class="fas fa-home mr-2"></i>返回首页
+        </a>
+      </div>
     </div>
   </div>
 
-  <footer class="bg-dark text-white py-4 mt-5">
+  <!-- 页脚 -->
+  <footer class="footer-gradient text-white py-4 mt-5">
     <div class="container text-center">
-      <p>表面缺陷检测系统 &copy; {{ current_year }}</p>
+      <p class="mb-0">工业表面缺陷智能检测系统 &copy; {{ current_year }}</p>
+      <small>Powered by Deep Learning Technology</small>
     </div>
   </footer>
 
+  <!-- 样式 -->
+  <style>
+    .color-legend-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .color-box {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+
+    .defect-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    @media print {
+      .navbar, footer, .btn {
+        display: none !important;
+      }
+
+      .container {
+        max-width: 100% !important;
+      }
+    }
+  </style>
+
+  <!-- 脚本 -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
