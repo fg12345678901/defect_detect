@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
 import os
 from pathlib import Path
 import torch
@@ -8,6 +8,8 @@ import numpy as np
 import torch.nn.functional as F
 import threading
 from datetime import datetime
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 
 from models.classifier import create_classifier
 from models.segmenter import get_unet_model
@@ -42,7 +44,8 @@ _progress = {
     'stats': None,
     'class_counts': None,
     'class_img_map': None,
-    'task': None
+    'task': None,
+    'results': None
 }
 
 def load_segmenter(task):
@@ -136,20 +139,30 @@ def start_batch(task):
     if not files:
         return redirect(url_for('task_page', task=task))
     info = SEGMENT_MODELS[task]
-    _progress['total'] = len(files)
+    saved_paths = []
+    for f in files:
+        fname = Path(f.filename)
+        save_path = UPLOAD_DIR / fname
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        f.save(save_path)
+        saved_paths.append(save_path)
+    _progress['total'] = len(saved_paths)
     _progress['processed'] = 0
     _progress['done'] = False
     _progress['task'] = task
+    _progress['stats'] = None
+    _progress['class_counts'] = None
+    _progress['class_img_map'] = None
+    _progress['results'] = None
 
-    def worker(file_list):
-        stats = {'total_images': len(file_list), 'defect_images': 0}
+    def worker(path_list):
+        stats = {'total_images': len(path_list), 'defect_images': 0}
         class_counts = {f'class_{i}': 0 for i in range(1, info["classes"])}
         class_img_map = {f'class_{i}': [] for i in range(1, info["classes"])}
-        for f in file_list:
-            save_path = UPLOAD_DIR / f.filename
-            f.save(save_path)
-            out_name = f"{task}_{f.filename}"
-            _, mask = seg_predict(save_path, task, out_name)
+        for path in path_list:
+            fname = Path(path).name
+            out_name = f"{task}_{fname}"
+            _, mask = seg_predict(path, task, out_name)
             unique = np.unique(mask)
             if np.any(mask > 0):
                 stats['defect_images'] += 1
@@ -165,8 +178,8 @@ def start_batch(task):
         _progress['class_img_map'] = class_img_map
         _progress['done'] = True
 
-    threading.Thread(target=worker, args=(files,)).start()
-    return render_template('progress.html')
+    threading.Thread(target=worker, args=(saved_paths,)).start()
+    return render_template('progress.html', result_url=url_for('result_batch'))
 
 @app.route('/progress_status')
 def progress_status():
@@ -189,30 +202,85 @@ def result_batch():
         current_year=year
     )
 
-@app.route('/classify', methods=['GET', 'POST'])
+
+@app.route('/download_report')
+def download_report():
+    if not _progress['done'] or _progress.get('stats') is None:
+        return redirect(url_for('index'))
+    report_dir = BASE_DIR / 'static' / 'reports'
+    report_dir.mkdir(parents=True, exist_ok=True)
+    pdf_path = report_dir / 'report.pdf'
+    c = canvas.Canvas(str(pdf_path), pagesize=A4)
+    c.setFont("Helvetica", 16)
+    c.drawString(50, 800, "检测报告")
+    stats = _progress['stats']
+    y = 760
+    c.setFont("Helvetica", 12)
+    c.drawString(50, y, f"总图片数: {stats['total_images']}")
+    y -= 20
+    c.drawString(50, y, f"有缺陷图片数: {stats['defect_images']}")
+    if _progress.get('class_counts'):
+        y -= 40
+        c.drawString(50, y, "各缺陷类型统计:")
+        y -= 20
+        for cls, cnt in _progress['class_counts'].items():
+            c.drawString(70, y, f"{cls}: {cnt}")
+            y -= 20
+    c.save()
+    return send_file(pdf_path, as_attachment=True)
+
+@app.route('/classify', methods=['GET'])
 def classify_upload():
-    if request.method == 'GET':
-        year = datetime.now().year
-        return render_template('classify.html', current_year=year)
+    year = datetime.now().year
+    return render_template('classify.html', current_year=year)
+
+
+@app.route('/classify/start', methods=['POST'])
+def start_classify():
     files = request.files.getlist('images')
     if not files:
         return redirect(url_for('classify_upload'))
-    classifier = load_classifier()
-    results = []
+    saved_paths = []
+    for f in files:
+        fname = Path(f.filename)
+        save_path = UPLOAD_DIR / fname
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        f.save(save_path)
+        saved_paths.append(save_path)
+    _progress['total'] = len(saved_paths)
+    _progress['processed'] = 0
+    _progress['done'] = False
+    _progress['task'] = 'classify'
+    _progress['stats'] = None
+    _progress['class_counts'] = None
+    _progress['class_img_map'] = None
+    _progress['results'] = []
+
+    def worker(path_list):
+        classifier = load_classifier()
+        for path in path_list:
+            img = Image.open(path).convert('RGB')
+            x = cls_tf(img).unsqueeze(0)
+            with torch.no_grad():
+                out = classifier(x)
+            pred_idx = out.argmax(1).item()
+            task = list(SEGMENT_MODELS.keys())[pred_idx]
+            out_name = f"cls_{task}_{Path(path).name}"
+            seg_predict(path, task, out_name)
+            _progress['results'].append({'task': task, 'image': out_name})
+            _progress['processed'] += 1
+        _progress['done'] = True
+
+    threading.Thread(target=worker, args=(saved_paths,)).start()
+    return render_template('progress.html', result_url=url_for('result_classify'))
+
+
+@app.route('/result_classify')
+def result_classify():
+    if not _progress['done'] or _progress.get('results') is None:
+        return redirect(url_for('index'))
     year = datetime.now().year
-    for file in files:
-        save_path = UPLOAD_DIR / file.filename
-        file.save(save_path)
-        img = Image.open(save_path).convert('RGB')
-        x = cls_tf(img).unsqueeze(0)
-        with torch.no_grad():
-            out = classifier(x)
-        pred_idx = out.argmax(1).item()
-        task = list(SEGMENT_MODELS.keys())[pred_idx]
-        out_name = f"cls_{task}_{file.filename}"
-        seg_predict(save_path, task, out_name)
-        results.append({'task': task, 'image': out_name})
-    return render_template('classify_result.html', results=results, current_year=year)
+    return render_template('classify_result.html', results=_progress['results'], current_year=year)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
