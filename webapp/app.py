@@ -13,6 +13,7 @@ from datetime import datetime
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from xhtml2pdf import pisa
+import pdfkit
 import matplotlib.pyplot as plt
 import matplotlib
 
@@ -40,6 +41,17 @@ try:
     pdfmetrics.registerFont(TTFont('SimHei', 'C:/Windows/Fonts/simhei.ttf'))
 except:
     pass
+
+
+def render_pdf_from_html(html_content, pdf_path):
+    """Render PDF using wkhtmltopdf if available, otherwise xhtml2pdf."""
+    wkhtmltopdf_path = shutil.which('wkhtmltopdf')
+    if wkhtmltopdf_path:
+        config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+        pdfkit.from_string(html_content, str(pdf_path), configuration=config)
+    else:
+        with open(pdf_path, 'wb') as f:
+            pisa.CreatePDF(html_content, dest=f)
 
 # 加载任务信息和颜色映射
 TASK_INFO_PATH = BASE_DIR / 'tasks_info.json'
@@ -196,13 +208,7 @@ def generate_pie_chart_base64(data, task, title='缺陷分布'):
             if cls_id is not None:
                 rgb = color_map.get(cls_id, (128, 128, 128))
                 r, g, b = rgb
-                r_norm = r / 255.0
-                g_norm = g / 255.0
-                b_norm = b / 255.0
-                r_new = min(1.0, r_norm * 0.7 + 0.3)
-                g_new = min(1.0, g_norm * 0.7 + 0.3)
-                b_new = min(1.0, b_norm * 0.7 + 0.3)
-                colors.append([r_new, g_new, b_new])
+                colors.append([r / 255.0, g / 255.0, b / 255.0])
             else:
                 colors.append([0.5, 0.5, 0.5])
 
@@ -402,6 +408,7 @@ def download_report():
 
         # 准备报告数据
         report_data = {
+            'task': 'classify',
             'stats': {'total_images': total, 'defect_images': total_defects},
             'task_stats': stats,
             'class_counts_all': _progress['class_counts'],
@@ -428,13 +435,12 @@ def download_report():
         # 渲染report.html模板
         html_content = render_template('report.html', **report_data)
 
-    # 通过 xhtml2pdf 将 HTML 转为 PDF
+    # 将 HTML 转为 PDF
     report_dir = BASE_DIR / 'static' / 'reports'
     report_dir.mkdir(parents=True, exist_ok=True)
     pdf_path = report_dir / f'report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
 
-    with open(pdf_path, 'wb') as f:
-        pisa.CreatePDF(html_content, dest=f)
+    render_pdf_from_html(html_content, pdf_path)
 
     return send_file(pdf_path, as_attachment=True,
                      download_name=f"检测报告_{datetime.now().strftime('%Y%m%d')}.pdf")
