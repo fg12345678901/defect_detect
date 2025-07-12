@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <!-- 添加 Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
 </head>
 <body>
   <!-- 导航栏 -->
@@ -217,27 +217,24 @@
                       <span class="badge badge-warning">{{ count }} 张</span>
                       <i class="fas fa-images float-right"></i>
                     </div>
-                    <div class="image-preview" id="defect-{{ task }}-{{ loop.index }}" style="display: none;">
+                  <div class="image-preview" id="defect-{{ task }}-{{ loop.index }}" style="display: none;">
                       <div class="row mt-3">
-                        {% set imgs_found = false %}
-                        {% for cls_key, imgs in class_img_map[task].items() %}
-                          {% if imgs|length > 0 %}
-                            {% set imgs_found = true %}
-                            {% for img in imgs[:6] %}
-                            <div class="col-md-2 col-sm-4 mb-2">
-                              <div class="image-item-small">
-                                <img src="{{ url_for('static', filename='pred_vis/' + img) }}" class="img-fluid" alt="{{ img }}">
-                              </div>
+                        {% set cls_key = 'class_' ~ loop.index %}
+                        {% set imgs = class_img_map[task].get(cls_key, []) %}
+                        {% if imgs|length > 0 %}
+                          {% for img in imgs[:6] %}
+                          <div class="col-md-2 col-sm-4 mb-2">
+                            <div class="image-item-small">
+                              <img src="{{ url_for('static', filename='pred_vis/' + img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
-                            {% endfor %}
-                            {% if imgs|length > 6 %}
-                            <div class="col-12">
-                              <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
-                            </div>
-                            {% endif %}
+                          </div>
+                          {% endfor %}
+                          {% if imgs|length > 6 %}
+                          <div class="col-12">
+                            <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
+                          </div>
                           {% endif %}
-                        {% endfor %}
-                        {% if not imgs_found %}
+                        {% else %}
                         <div class="col-12">
                           <p class="text-muted small">图片已分类存储在对应文件夹中</p>
                         </div>
@@ -347,7 +344,7 @@
   </footer>
 
   <!-- 脚本 -->
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 

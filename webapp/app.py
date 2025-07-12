@@ -10,11 +10,10 @@ import numpy as np
 import torch.nn.functional as F
 import threading
 from datetime import datetime
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.colors import HexColor
+from xhtml2pdf import pisa
+import pdfkit
 import matplotlib.pyplot as plt
 import matplotlib
 
@@ -42,6 +41,17 @@ try:
     pdfmetrics.registerFont(TTFont('SimHei', 'C:/Windows/Fonts/simhei.ttf'))
 except:
     pass
+
+
+def render_pdf_from_html(html_content, pdf_path):
+    """Render PDF using wkhtmltopdf if available, otherwise xhtml2pdf."""
+    wkhtmltopdf_path = shutil.which('wkhtmltopdf')
+    if wkhtmltopdf_path:
+        config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+        pdfkit.from_string(html_content, str(pdf_path), configuration=config)
+    else:
+        with open(pdf_path, 'wb') as f:
+            pisa.CreatePDF(html_content, dest=f)
 
 # 加载任务信息和颜色映射
 TASK_INFO_PATH = BASE_DIR / 'tasks_info.json'
@@ -176,6 +186,10 @@ def generate_pie_chart_base64(data, task, title='缺陷分布'):
         color_map = SOLAR_COLOR_MAP
     else:
         color_map = TASK_COLOR_MAPS.get(task, {})
+    name_to_id = {
+        info['cn']: int(cid)
+        for cid, info in TASK_INFO['tasks'].get(task, {}).get('class_names', {}).items()
+    }
 
     labels = []
     sizes = []
@@ -185,21 +199,16 @@ def generate_pie_chart_base64(data, task, title='缺陷分布'):
         if v > 0:
             labels.append(k)
             sizes.append(v)
-            # 获取原始颜色并调整为更清新的颜色
+            # 根据类别编号选择颜色
+            cls_id = None
             if 'class_' in k:
                 cls_id = int(k.split('_')[1])
+            else:
+                cls_id = name_to_id.get(k)
+            if cls_id is not None:
                 rgb = color_map.get(cls_id, (128, 128, 128))
-                # 调整颜色使其更清新（增加亮度，降低饱和度）
                 r, g, b = rgb
-                # 转换为HSV，调整后再转回RGB
-                r_norm = r / 255.0
-                g_norm = g / 255.0
-                b_norm = b / 255.0
-                # 简单的颜色调整：增加亮度
-                r_new = min(1.0, r_norm * 0.7 + 0.3)
-                g_new = min(1.0, g_norm * 0.7 + 0.3)
-                b_new = min(1.0, b_norm * 0.7 + 0.3)
-                colors.append([r_new, g_new, b_new])
+                colors.append([r / 255.0, g / 255.0, b / 255.0])
             else:
                 colors.append([0.5, 0.5, 0.5])
 
@@ -399,6 +408,7 @@ def download_report():
 
         # 准备报告数据
         report_data = {
+            'task': 'classify',
             'stats': {'total_images': total, 'defect_images': total_defects},
             'task_stats': stats,
             'class_counts_all': _progress['class_counts'],
@@ -407,8 +417,7 @@ def download_report():
             'task_info': TASK_INFO
         }
 
-        # 这里可以创建一个专门的分类报告模板
-        # 暂时使用简单的PDF生成
+        html_content = render_template('report.html', **report_data)
     else:
         # 单任务报告
         report_data = {
@@ -426,75 +435,15 @@ def download_report():
         # 渲染report.html模板
         html_content = render_template('report.html', **report_data)
 
-        # 这里可以使用HTML转PDF的库，但目前先使用简单的reportlab
-
-    # 创建PDF（保持原有逻辑）
+    # 将 HTML 转为 PDF
     report_dir = BASE_DIR / 'static' / 'reports'
     report_dir.mkdir(parents=True, exist_ok=True)
     pdf_path = report_dir / f'report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
 
-    c = canvas.Canvas(str(pdf_path), pagesize=A4)
-    try:
-        c.setFont("SimHei", 16)
-    except:
-        c.setFont("Helvetica", 16)
+    render_pdf_from_html(html_content, pdf_path)
 
-    c.drawString(50, 800, "表面缺陷检测报告")
-    c.setFont("SimHei", 10)
-    c.drawString(50, 780, f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
-    y = 740
-    c.setFont("SimHei", 12)
-
-    if _progress['task'] == 'classify':
-        stats = _progress['stats']
-        total = sum(v['total_images'] for v in stats.values())
-        c.drawString(50, y, f"检测图片总数: {total}")
-        y -= 30
-
-        c.drawString(50, y, "各任务分布:")
-        y -= 20
-        for task, s in stats.items():
-            task_cn = TASK_INFO['tasks'].get(task, {}).get('task_name_cn', task)
-            c.drawString(70, y, f"{task_cn}: {s['total_images']} 张 (缺陷: {s['defect_images']} 张)")
-            y -= 20
-
-        if _progress.get('class_counts'):
-            y -= 20
-            c.drawString(50, y, "缺陷类型详情:")
-            y -= 20
-            for task, counts in _progress['class_counts'].items():
-                if any(cnt > 0 for cnt in counts.values()):
-                    task_cn = TASK_INFO['tasks'].get(task, {}).get('task_name_cn', task)
-                    c.drawString(70, y, f"{task_cn}:")
-                    y -= 20
-                    for cls, cnt in counts.items():
-                        if cnt > 0:
-                            c.drawString(90, y, f"{cls}: {cnt} 张")
-                            y -= 20
-    else:
-        task_info = TASK_INFO['tasks'].get(_progress['task'], {})
-        c.drawString(50, y, f"检测任务: {task_info.get('task_name_cn', _progress['task'])}")
-        y -= 20
-        c.drawString(50, y, f"总图片数: {_progress['stats']['total_images']}")
-        y -= 20
-        c.drawString(50, y, f"有缺陷图片数: {_progress['stats']['defect_images']}")
-        y -= 20
-        defect_rate = (_progress['stats']['defect_images'] / _progress['stats']['total_images'] * 100) if \
-            _progress['stats']['total_images'] > 0 else 0
-        c.drawString(50, y, f"缺陷率: {defect_rate:.1f}%")
-
-        if _progress.get('class_counts'):
-            y -= 30
-            c.drawString(50, y, "各缺陷类型统计:")
-            y -= 20
-            for cls, cnt in _progress['class_counts'].items():
-                if cnt > 0:
-                    c.drawString(70, y, f"{cls}: {cnt} 张")
-                    y -= 20
-
-    c.save()
-    return send_file(pdf_path, as_attachment=True, download_name=f"检测报告_{datetime.now().strftime('%Y%m%d')}.pdf")
+    return send_file(pdf_path, as_attachment=True,
+                     download_name=f"检测报告_{datetime.now().strftime('%Y%m%d')}.pdf")
 
 
 @app.route('/classify', methods=['GET'])
