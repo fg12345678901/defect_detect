@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
 import os
 import json
+import shutil
 from pathlib import Path
 import torch
 from torchvision import transforms
@@ -11,6 +12,15 @@ import threading
 from datetime import datetime
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.colors import HexColor
+import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.use('Agg')
+import base64
+import io
 
 from models.classifier import create_classifier
 from models.segmenter import get_unet_model
@@ -22,8 +32,16 @@ app = Flask(__name__)
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / 'static' / 'uploads'
 PRED_DIR = BASE_DIR / 'static' / 'pred_vis'
+CATEGORIZED_DIR = BASE_DIR / 'static' / 'categorized'
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 PRED_DIR.mkdir(parents=True, exist_ok=True)
+CATEGORIZED_DIR.mkdir(parents=True, exist_ok=True)
+
+# 注册中文字体
+try:
+    pdfmetrics.registerFont(TTFont('SimHei', 'C:/Windows/Fonts/simhei.ttf'))
+except:
+    pass
 
 # 加载任务信息和颜色映射
 TASK_INFO_PATH = BASE_DIR / 'tasks_info.json'
@@ -61,6 +79,7 @@ _progress = {
     'results': None
 }
 
+
 def load_segmenter(task):
     if task not in _loaded_segmenters:
         info = SEGMENT_MODELS[task]
@@ -70,6 +89,7 @@ def load_segmenter(task):
         model.eval()
         _loaded_segmenters[task] = model
     return _loaded_segmenters[task]
+
 
 def load_classifier():
     global _classifier
@@ -81,12 +101,14 @@ def load_classifier():
         _classifier = model
     return _classifier
 
+
 # transforms
 cls_tf = transforms.Compose([
     transforms.Resize((380, 380)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
+
 
 def seg_predict(image_path, task, out_name):
     model = load_segmenter(task)
@@ -96,7 +118,7 @@ def seg_predict(image_path, task, out_name):
 
     tf = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
     tensor = tf(img).unsqueeze(0)
     h, w = tensor.shape[-2:]
@@ -113,17 +135,122 @@ def seg_predict(image_path, task, out_name):
     visualize_prediction_3d(img_np, pred_3d, out_name, str(PRED_DIR), task=task)
     return PRED_DIR / out_name, pred
 
+
+def categorize_images(stats, class_img_map, task):
+    """根据检测结果将图片按缺陷类型分类到不同文件夹"""
+    # 清空分类目录
+    if CATEGORIZED_DIR.exists():
+        shutil.rmtree(CATEGORIZED_DIR)
+    CATEGORIZED_DIR.mkdir(parents=True, exist_ok=True)
+
+    # 创建无缺陷目录
+    no_defect_dir = CATEGORIZED_DIR / '无缺陷'
+    no_defect_dir.mkdir(exist_ok=True)
+
+    # 获取任务的类名映射
+    task_info = TASK_INFO['tasks'].get(task, {})
+    class_names = task_info.get('class_names', {})
+
+    # 为每个缺陷类创建目录
+    for cls_key, img_list in class_img_map.items():
+        if img_list:
+            cls_id = cls_key.split('_')[1]
+            cls_name_cn = class_names.get(cls_id, {}).get('cn', cls_key)
+            class_dir = CATEGORIZED_DIR / cls_name_cn
+            class_dir.mkdir(exist_ok=True)
+
+            # 复制检测结果图到对应目录
+            for img_name in img_list:
+                src_path = PRED_DIR / img_name
+                if src_path.exists():
+                    shutil.copy2(src_path, class_dir / img_name)
+
+
+def generate_pie_chart_base64(data, task, title='缺陷分布'):
+    """生成饼图并返回base64编码，使用更清新的颜色"""
+    if not data or all(v == 0 for v in data.values()):
+        return None
+
+    # 获取颜色映射
+    if task == 'solar-panel':
+        color_map = SOLAR_COLOR_MAP
+    else:
+        color_map = TASK_COLOR_MAPS.get(task, {})
+
+    labels = []
+    sizes = []
+    colors = []
+
+    for k, v in data.items():
+        if v > 0:
+            labels.append(k)
+            sizes.append(v)
+            # 获取原始颜色并调整为更清新的颜色
+            if 'class_' in k:
+                cls_id = int(k.split('_')[1])
+                rgb = color_map.get(cls_id, (128, 128, 128))
+                # 调整颜色使其更清新（增加亮度，降低饱和度）
+                r, g, b = rgb
+                # 转换为HSV，调整后再转回RGB
+                r_norm = r / 255.0
+                g_norm = g / 255.0
+                b_norm = b / 255.0
+                # 简单的颜色调整：增加亮度
+                r_new = min(1.0, r_norm * 0.7 + 0.3)
+                g_new = min(1.0, g_norm * 0.7 + 0.3)
+                b_new = min(1.0, b_norm * 0.7 + 0.3)
+                colors.append([r_new, g_new, b_new])
+            else:
+                colors.append([0.5, 0.5, 0.5])
+
+    # 设置中文字体
+    plt.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
+    plt.rcParams['axes.unicode_minus'] = False
+
+    # 创建饼图
+    fig, ax = plt.subplots(figsize=(8, 6))
+    if labels:
+        wedges, texts, autotexts = ax.pie(sizes, labels=labels, autopct='%1.1f%%',
+                                          colors=colors, startangle=90,
+                                          textprops={'fontsize': 12})
+        # 设置标签字体
+        for text in texts:
+            text.set_fontsize(12)
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_fontsize(10)
+            autotext.set_weight('bold')
+
+    ax.set_title(title, fontsize=16, weight='bold', pad=20)
+
+    # 转换为base64
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight', facecolor='white')
+    buffer.seek(0)
+    image_base64 = base64.b64encode(buffer.getvalue()).decode()
+    plt.close(fig)
+
+    return image_base64
+
+
 @app.route('/')
 def index():
     year = datetime.now().year
-    return render_template('index.html', tasks=list(SEGMENT_MODELS.keys()), current_year=year)
+    # 将智能分类放在最前面
+    tasks_ordered = ['classify'] + list(SEGMENT_MODELS.keys())
+    return render_template('index.html', tasks=list(SEGMENT_MODELS.keys()),
+                           tasks_ordered=tasks_ordered,
+                           task_info=TASK_INFO, current_year=year)
+
 
 @app.route('/task/<task>')
 def task_page(task):
     if task not in SEGMENT_MODELS:
         return redirect(url_for('index'))
     year = datetime.now().year
-    return render_template('task.html', task=task, current_year=year)
+    task_info = TASK_INFO['tasks'].get(task, {})
+    return render_template('task.html', task=task, task_info=task_info, current_year=year)
+
 
 @app.route('/task/<task>/single', methods=['POST'])
 def task_single(task):
@@ -135,14 +262,28 @@ def task_single(task):
     save_path = UPLOAD_DIR / file.filename
     file.save(save_path)
     out_name = f"{task}_{file.filename}"
-    pred_path, _ = seg_predict(save_path, task, out_name)
+    pred_path, mask = seg_predict(save_path, task, out_name)
+
+    # 获取检测到的缺陷类型
+    task_info = TASK_INFO['tasks'].get(task, {})
+    class_names = task_info.get('class_names', {})
+    detected_classes = []
+    for c in np.unique(mask):
+        if c > 0:
+            cls_name = class_names.get(str(c), {}).get('cn', f'类别{c}')
+            detected_classes.append(cls_name)
+
     year = datetime.now().year
     return render_template(
         'single_result.html',
         original_image=f'uploads/{file.filename}',
         result_image=f'pred_vis/{out_name}',
+        detected_classes=detected_classes,
+        task=task,
+        task_info=task_info,
         current_year=year
     )
+
 
 @app.route('/task/<task>/start_batch', methods=['POST'])
 def start_batch(task):
@@ -169,9 +310,19 @@ def start_batch(task):
     _progress['results'] = None
 
     def worker(path_list):
+        task_info = TASK_INFO['tasks'].get(task, {})
+        class_names = task_info.get('class_names', {})
+
         stats = {'total_images': len(path_list), 'defect_images': 0}
-        class_counts = {f'class_{i}': 0 for i in range(1, info["classes"])}
-        class_img_map = {f'class_{i}': [] for i in range(1, info["classes"])}
+        class_counts = {}
+        class_img_map = {}
+
+        # 初始化类别统计
+        for i in range(1, info["classes"]):
+            cls_name = class_names.get(str(i), {}).get('cn', f'类别{i}')
+            class_counts[cls_name] = 0
+            class_img_map[f'class_{i}'] = []
+
         for path in path_list:
             fname = Path(path).name
             out_name = f"{task}_{fname}"
@@ -182,10 +333,14 @@ def start_batch(task):
             for c in unique:
                 if c == 0:
                     continue
-                key = f'class_{c}'
-                class_counts[key] += 1
-                class_img_map[key].append(out_name)
+                cls_name = class_names.get(str(c), {}).get('cn', f'类别{c}')
+                class_counts[cls_name] += 1
+                class_img_map[f'class_{c}'].append(out_name)
             _progress['processed'] += 1
+
+        # 分类存储图片
+        categorize_images(stats, class_img_map, task)
+
         _progress['stats'] = stats
         _progress['class_counts'] = class_counts
         _progress['class_img_map'] = class_img_map
@@ -193,6 +348,7 @@ def start_batch(task):
 
     threading.Thread(target=worker, args=(saved_paths,)).start()
     return render_template('progress.html', result_url=url_for('result_batch'))
+
 
 @app.route('/progress_status')
 def progress_status():
@@ -202,16 +358,28 @@ def progress_status():
         'done': _progress['done']
     })
 
+
 @app.route('/result_batch')
 def result_batch():
     if not _progress['done']:
         return redirect(url_for('index'))
+
+    task = _progress['task']
+    task_info = TASK_INFO['tasks'].get(task, {})
+
+    # 生成饼图
+    pie_chart_base64 = generate_pie_chart_base64(_progress['class_counts'], task,
+                                                 f"{task_info.get('task_name_cn', task)}缺陷分布")
+
     year = datetime.now().year
     return render_template(
         'batch_result.html',
         stats=_progress['stats'],
         class_counts_mapped=_progress['class_counts'],
         class_img_map_mapped=_progress['class_img_map'],
+        pie_chart_base64=pie_chart_base64,
+        task=task,
+        task_info=task_info,
         current_year=year
     )
 
@@ -220,50 +388,119 @@ def result_batch():
 def download_report():
     if not _progress['done'] or _progress.get('stats') is None:
         return redirect(url_for('index'))
+
+    # 使用report.html模板生成HTML内容
+    task = _progress.get('task')
+    if task == 'classify':
+        # 自动分类报告需要特殊处理
+        stats = _progress['stats']
+        total = sum(v['total_images'] for v in stats.values())
+        total_defects = sum(v['defect_images'] for v in stats.values())
+
+        # 准备报告数据
+        report_data = {
+            'stats': {'total_images': total, 'defect_images': total_defects},
+            'task_stats': stats,
+            'class_counts_all': _progress['class_counts'],
+            'current_datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'current_year': datetime.now().year,
+            'task_info': TASK_INFO
+        }
+
+        # 这里可以创建一个专门的分类报告模板
+        # 暂时使用简单的PDF生成
+    else:
+        # 单任务报告
+        report_data = {
+            'stats': _progress['stats'],
+            'class_counts_mapped': _progress['class_counts'],
+            'class_img_map_mapped': _progress['class_img_map'],
+            'pie_chart_base64': generate_pie_chart_base64(_progress['class_counts'], task,
+                                                          f"{TASK_INFO['tasks'][task]['task_name_cn']}缺陷分布"),
+            'current_datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'current_year': datetime.now().year,
+            'task': task,
+            'task_info': TASK_INFO['tasks'].get(task, {})
+        }
+
+        # 渲染report.html模板
+        html_content = render_template('report.html', **report_data)
+
+        # 这里可以使用HTML转PDF的库，但目前先使用简单的reportlab
+
+    # 创建PDF（保持原有逻辑）
     report_dir = BASE_DIR / 'static' / 'reports'
     report_dir.mkdir(parents=True, exist_ok=True)
-    pdf_path = report_dir / 'report.pdf'
+    pdf_path = report_dir / f'report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+
     c = canvas.Canvas(str(pdf_path), pagesize=A4)
-    c.setFont("Helvetica", 16)
-    c.drawString(50, 800, "检测报告")
-    stats = _progress['stats']
-    y = 760
-    c.setFont("Helvetica", 12)
+    try:
+        c.setFont("SimHei", 16)
+    except:
+        c.setFont("Helvetica", 16)
+
+    c.drawString(50, 800, "表面缺陷检测报告")
+    c.setFont("SimHei", 10)
+    c.drawString(50, 780, f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+    y = 740
+    c.setFont("SimHei", 12)
 
     if _progress['task'] == 'classify':
+        stats = _progress['stats']
         total = sum(v['total_images'] for v in stats.values())
-        c.drawString(50, y, f"总图片数: {total}")
+        c.drawString(50, y, f"检测图片总数: {total}")
+        y -= 30
+
+        c.drawString(50, y, "各任务分布:")
         y -= 20
         for task, s in stats.items():
-            c.drawString(50, y, f"{task}: {s['total_images']} 张, 有缺陷 {s['defect_images']}")
+            task_cn = TASK_INFO['tasks'].get(task, {}).get('task_name_cn', task)
+            c.drawString(70, y, f"{task_cn}: {s['total_images']} 张 (缺陷: {s['defect_images']} 张)")
             y -= 20
+
         if _progress.get('class_counts'):
+            y -= 20
+            c.drawString(50, y, "缺陷类型详情:")
+            y -= 20
             for task, counts in _progress['class_counts'].items():
-                y -= 20
-                c.drawString(50, y, f"{task} 缺陷统计:")
-                y -= 20
-                for cls, cnt in counts.items():
-                    if cnt > 0:
-                        c.drawString(70, y, f"{cls}: {cnt}")
-                        y -= 20
+                if any(cnt > 0 for cnt in counts.values()):
+                    task_cn = TASK_INFO['tasks'].get(task, {}).get('task_name_cn', task)
+                    c.drawString(70, y, f"{task_cn}:")
+                    y -= 20
+                    for cls, cnt in counts.items():
+                        if cnt > 0:
+                            c.drawString(90, y, f"{cls}: {cnt} 张")
+                            y -= 20
     else:
-        c.drawString(50, y, f"总图片数: {stats['total_images']}")
+        task_info = TASK_INFO['tasks'].get(_progress['task'], {})
+        c.drawString(50, y, f"检测任务: {task_info.get('task_name_cn', _progress['task'])}")
         y -= 20
-        c.drawString(50, y, f"有缺陷图片数: {stats['defect_images']}")
+        c.drawString(50, y, f"总图片数: {_progress['stats']['total_images']}")
+        y -= 20
+        c.drawString(50, y, f"有缺陷图片数: {_progress['stats']['defect_images']}")
+        y -= 20
+        defect_rate = (_progress['stats']['defect_images'] / _progress['stats']['total_images'] * 100) if \
+            _progress['stats']['total_images'] > 0 else 0
+        c.drawString(50, y, f"缺陷率: {defect_rate:.1f}%")
+
         if _progress.get('class_counts'):
-            y -= 40
+            y -= 30
             c.drawString(50, y, "各缺陷类型统计:")
             y -= 20
             for cls, cnt in _progress['class_counts'].items():
-                c.drawString(70, y, f"{cls}: {cnt}")
-                y -= 20
+                if cnt > 0:
+                    c.drawString(70, y, f"{cls}: {cnt} 张")
+                    y -= 20
+
     c.save()
-    return send_file(pdf_path, as_attachment=True)
+    return send_file(pdf_path, as_attachment=True, download_name=f"检测报告_{datetime.now().strftime('%Y%m%d')}.pdf")
+
 
 @app.route('/classify', methods=['GET'])
 def classify_upload():
     year = datetime.now().year
-    return render_template('classify.html', current_year=year)
+    return render_template('classify.html', task_info=TASK_INFO, current_year=year)
 
 
 @app.route('/classify/start', methods=['POST'])
@@ -291,7 +528,35 @@ def start_classify():
         classifier = load_classifier()
         # 初始化统计结构
         task_stats = {t: {'total_images': 0, 'defect_images': 0} for t in SEGMENT_MODELS}
-        task_class_counts = {t: {f'class_{i}': 0 for i in range(1, SEGMENT_MODELS[t]['classes'])} for t in SEGMENT_MODELS}
+        task_class_counts = {}
+        task_class_img_map = {}
+
+        for t in SEGMENT_MODELS:
+            task_info = TASK_INFO['tasks'].get(t, {})
+            class_names = task_info.get('class_names', {})
+            task_class_counts[t] = {}
+            task_class_img_map[t] = {}
+            for i in range(1, SEGMENT_MODELS[t]['classes']):
+                cls_name = class_names.get(str(i), {}).get('cn', f'类别{i}')
+                task_class_counts[t][cls_name] = 0
+                task_class_img_map[t][f'class_{i}'] = []
+
+        # 创建分类结果存储目录
+        classify_result_dir = CATEGORIZED_DIR / 'auto_classify'
+        if classify_result_dir.exists():
+            shutil.rmtree(classify_result_dir)
+        classify_result_dir.mkdir(parents=True, exist_ok=True)
+
+        # 为每个任务创建目录
+        for t in SEGMENT_MODELS:
+            task_dir = classify_result_dir / TASK_INFO['tasks'][t]['task_name_cn']
+            task_dir.mkdir(exist_ok=True)
+            (task_dir / '无缺陷').mkdir(exist_ok=True)
+            # 为每个缺陷类型创建目录
+            for i in range(1, SEGMENT_MODELS[t]['classes']):
+                cls_name = TASK_INFO['tasks'][t]['class_names'].get(str(i), {}).get('cn', f'类别{i}')
+                (task_dir / cls_name).mkdir(exist_ok=True)
+
         for path in path_list:
             img = Image.open(path).convert('RGB')
             x = cls_tf(img).unsqueeze(0)
@@ -301,19 +566,43 @@ def start_classify():
             task = list(SEGMENT_MODELS.keys())[pred_idx]
             out_name = f"cls_{task}_{Path(path).name}"
             _, mask = seg_predict(path, task, out_name)
-            _progress['results'].append({'task': task, 'image': out_name})
+
+            _progress['results'].append({
+                'task': task,
+                'image': out_name,
+                'has_defect': np.any(mask > 0)
+            })
+
             task_stats[task]['total_images'] += 1
+            task_cn = TASK_INFO['tasks'][task]['task_name_cn']
+
             if np.any(mask > 0):
                 task_stats[task]['defect_images'] += 1
+                # 复制到对应缺陷文件夹
+                for c in np.unique(mask):
+                    if c > 0:
+                        cls_name = TASK_INFO['tasks'][task]['class_names'].get(str(c), {}).get('cn', f'类别{c}')
+                        dst_path = classify_result_dir / task_cn / cls_name / out_name
+                        shutil.copy2(PRED_DIR / out_name, dst_path)
+            else:
+                # 复制到无缺陷文件夹
+                dst_path = classify_result_dir / task_cn / '无缺陷' / out_name
+                shutil.copy2(PRED_DIR / out_name, dst_path)
+
+            task_info = TASK_INFO['tasks'].get(task, {})
+            class_names = task_info.get('class_names', {})
             unique = np.unique(mask)
             for c in unique:
                 if c == 0:
                     continue
-                key = f'class_{c}'
-                task_class_counts[task][key] += 1
+                cls_name = class_names.get(str(c), {}).get('cn', f'类别{c}')
+                task_class_counts[task][cls_name] += 1
+                task_class_img_map[task][f'class_{c}'].append(out_name)
             _progress['processed'] += 1
+
         _progress['stats'] = task_stats
         _progress['class_counts'] = task_class_counts
+        _progress['class_img_map'] = task_class_img_map
         _progress['done'] = True
 
     threading.Thread(target=worker, args=(saved_paths,)).start()
@@ -327,44 +616,86 @@ def result_classify():
     year = datetime.now().year
     stats = _progress.get('stats', {})
     class_counts = _progress.get('class_counts', {})
-    # 任务颜色 (固定)
+    class_img_map = _progress.get('class_img_map', {})
+
+    # 任务颜色 (柔和的颜色)
     task_colors = {
         'steel': '#e74c3c',
         'phone': '#3498db',
         'magnetic': '#2ecc71',
         'solar-panel': '#9b59b6'
     }
-    task_counts = {TASK_INFO['tasks'][t]['task_name_cn']: s['total_images'] for t, s in stats.items() if s['total_images'] > 0}
 
+    # 准备任务分布数据
+    task_counts = {}
+    for t, s in stats.items():
+        if s['total_images'] > 0:
+            task_cn = TASK_INFO['tasks'][t]['task_name_cn']
+            task_counts[task_cn] = s['total_images']
+
+    # 生成任务分布饼图
+    task_pie_base64 = None
+    if task_counts:
+        plt.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
+        plt.rcParams['axes.unicode_minus'] = False
+
+        labels = list(task_counts.keys())
+        sizes = list(task_counts.values())
+        colors = [task_colors.get(t, '#95a5a6') for t in stats.keys() if stats[t]['total_images'] > 0]
+
+        fig, ax = plt.subplots(figsize=(8, 6))
+        wedges, texts, autotexts = ax.pie(sizes, labels=labels, autopct='%1.1f%%',
+                                          colors=colors, startangle=90)
+        # 设置字体
+        for text in texts:
+            text.set_fontsize(12)
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_fontsize(10)
+            autotext.set_weight('bold')
+
+        ax.set_title('任务类型分布', fontsize=16, weight='bold', pad=20)
+
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight', facecolor='white')
+        buffer.seek(0)
+        task_pie_base64 = base64.b64encode(buffer.getvalue()).decode()
+        plt.close(fig)
+
+    # 准备各任务的缺陷分布数据和图表
     class_charts = {}
     for t, counts in class_counts.items():
-        name_cn = TASK_INFO['tasks'][t]['task_name_cn']
-        names_map = TASK_INFO['tasks'][t]['class_names']
-        color_map = SOLAR_COLOR_MAP if t == 'solar-panel' else TASK_COLOR_MAPS.get(t, {})
-        data = {}
-        colors = {}
-        for key, cnt in counts.items():
-            if cnt == 0:
-                continue
-            cls_id = int(key.split('_')[1])
-            label = names_map.get(str(cls_id), {}).get('cn', key)
-            data[label] = cnt
-            rgb = color_map.get(cls_id, (128, 128, 128))
-            colors[label] = f'rgb({rgb[0]}, {rgb[1]}, {rgb[2]})'
-        class_charts[t] = {'name_cn': name_cn, 'counts': data, 'colors': colors}
+        if any(cnt > 0 for cnt in counts.values()):
+            # 生成该任务的缺陷分布饼图
+            pie_base64 = generate_pie_chart_base64(counts, t,
+                                                   f"{TASK_INFO['tasks'][t]['task_name_cn']}缺陷分布")
+            if pie_base64:
+                class_charts[t] = {
+                    'name_cn': TASK_INFO['tasks'][t]['task_name_cn'],
+                    'pie_chart': pie_base64
+                }
 
+    # 准备结果展示
     results_by_task = {}
     for item in _progress['results']:
-        results_by_task.setdefault(item['task'], []).append(item['image'])
+        task = item['task']
+        if task not in results_by_task:
+            results_by_task[task] = []
+        results_by_task[task].append(item)
 
     return render_template(
         'classify_result.html',
         results_by_task=results_by_task,
         task_counts=task_counts,
-        task_colors=task_colors,
+        task_pie_base64=task_pie_base64,
         class_charts=class_charts,
+        stats=stats,
+        class_counts=class_counts,
+        class_img_map=class_img_map,
+        task_info=TASK_INFO,
         current_year=year
     )
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
