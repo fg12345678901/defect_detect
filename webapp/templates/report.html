@@ -5,7 +5,7 @@
   <title>{{ task_info.task_name_cn if task_info else '综合' }}缺陷检测报告</title>
   <style>
     body {
-      font-family: 'SimHei', 'Microsoft YaHei', Arial, sans-serif;
+      font-family: 'SimHei', 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif;
       margin: 0;
       padding: 0;
       color: #333;
@@ -327,6 +327,11 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if task_pie_charts[t] %}
+      <div style="text-align:center;margin-top:10px;">
+        <img src="data:image/png;base64,{{ task_pie_charts[t] }}" width="400" alt="pie">
+      </div>
+      {% endif %}
     </div>
     {% endif %}
     {% endfor %}
