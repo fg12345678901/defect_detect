@@ -308,6 +308,35 @@
       }
     }
 
+    async function getFilesFromItems(items) {
+      const fileList = [];
+      const queue = [];
+
+      function traverse(entry) {
+        return new Promise(resolve => {
+          if (entry.isFile) {
+            entry.file(file => { fileList.push(file); resolve(); });
+          } else if (entry.isDirectory) {
+            const reader = entry.createReader();
+            reader.readEntries(entries => {
+              Promise.all(entries.map(e => traverse(e))).then(resolve);
+            });
+          } else {
+            resolve();
+          }
+        });
+      }
+
+      for (let i = 0; i < items.length; i++) {
+        const entry = items[i].webkitGetAsEntry && items[i].webkitGetAsEntry();
+        if (entry) {
+          queue.push(traverse(entry));
+        }
+      }
+      await Promise.all(queue);
+      return fileList;
+    }
+
     fileInput.addEventListener('change', function(e) {
       handleFiles(e.target.files);
     });
@@ -323,16 +352,14 @@
       this.classList.remove('dragover');
     });
 
-    uploadArea.addEventListener('drop', function(e) {
+    uploadArea.addEventListener('drop', async function(e) {
       e.preventDefault();
       this.classList.remove('dragover');
-      const files = e.dataTransfer.files;
-      if (files && files.length > 0) {
+      const files = await getFilesFromItems(e.dataTransfer.items);
+      if (files.length > 0) {
         handleFiles(files);
         const dt = new DataTransfer();
-        for (let i = 0; i < files.length; i++) {
-          dt.items.add(files[i]);
-        }
+        files.forEach(f => dt.items.add(f));
         fileInput.files = dt.files;
       }
     });

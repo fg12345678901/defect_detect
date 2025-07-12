@@ -12,7 +12,7 @@ import threading
 from datetime import datetime
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-import pdfkit
+from xhtml2pdf import pisa
 import matplotlib.pyplot as plt
 import matplotlib
 
@@ -428,13 +428,13 @@ def download_report():
         # 渲染report.html模板
         html_content = render_template('report.html', **report_data)
 
-    # 使用wkhtmltopdf通过 pdfkit 生成 PDF
+    # 通过 xhtml2pdf 将 HTML 转为 PDF
     report_dir = BASE_DIR / 'static' / 'reports'
     report_dir.mkdir(parents=True, exist_ok=True)
     pdf_path = report_dir / f'report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
 
-    # pdfkit 需要系统安装 wkhtmltopdf
-    pdfkit.from_string(html_content, str(pdf_path))
+    with open(pdf_path, 'wb') as f:
+        pisa.CreatePDF(html_content, dest=f)
 
     return send_file(pdf_path, as_attachment=True,
                      download_name=f"检测报告_{datetime.now().strftime('%Y%m%d')}.pdf")
