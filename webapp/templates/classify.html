@@ -58,7 +58,8 @@
           </div>
         </div>
         <div class="col-lg-6 text-center">
-          <img src="{{ url_for('static', filename='images/ai-classify.svg') }}" alt="智能分类" class="img-fluid" style="max-width: 400px;">
+          <!-- 占位图，避免缺失资源导致页面报错 -->
+          <i class="fas fa-images fa-5x text-white-50"></i>
         </div>
       </div>
     </div>
@@ -293,24 +294,22 @@
     const submitBtn = document.getElementById('submitBtn');
     const uploadArea = document.getElementById('uploadArea');
 
-    fileInput.addEventListener('change', function(e) {
-      const files = e.target.files;
+    function handleFiles(files) {
       if (files.length > 0) {
         fileCount.textContent = files.length;
-
-        // 计算总大小
         let totalSize = 0;
         for (let i = 0; i < files.length; i++) {
           totalSize += files[i].size;
         }
         fileSize.textContent = `总大小: ${(totalSize / (1024 * 1024)).toFixed(2)} MB`;
-
         fileInfo.style.display = 'block';
         submitBtn.disabled = false;
-
-        // 更新文件标签
         document.querySelector('.custom-file-label').textContent = `已选择 ${files.length} 个文件`;
       }
+    }
+
+    fileInput.addEventListener('change', function(e) {
+      handleFiles(e.target.files);
     });
 
     // 拖拽上传
@@ -327,7 +326,16 @@
     uploadArea.addEventListener('drop', function(e) {
       e.preventDefault();
       this.classList.remove('dragover');
-      // 注意：文件夹拖拽在Web中的支持有限
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        // 将拖入的文件赋给隐藏的 input
+        const dt = new DataTransfer();
+        for (let i = 0; i < files.length; i++) {
+          dt.items.add(files[i]);
+        }
+        fileInput.files = dt.files;
+        handleFiles(fileInput.files);
+      }
     });
 
     // 点击区域触发文件选择

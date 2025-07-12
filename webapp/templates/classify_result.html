@@ -217,27 +217,24 @@
                       <span class="badge badge-warning">{{ count }} 张</span>
                       <i class="fas fa-images float-right"></i>
                     </div>
-                    <div class="image-preview" id="defect-{{ task }}-{{ loop.index }}" style="display: none;">
+                  <div class="image-preview" id="defect-{{ task }}-{{ loop.index }}" style="display: none;">
                       <div class="row mt-3">
-                        {% set imgs_found = false %}
-                        {% for cls_key, imgs in class_img_map[task].items() %}
-                          {% if imgs|length > 0 %}
-                            {% set imgs_found = true %}
-                            {% for img in imgs[:6] %}
-                            <div class="col-md-2 col-sm-4 mb-2">
-                              <div class="image-item-small">
-                                <img src="{{ url_for('static', filename='pred_vis/' + img) }}" class="img-fluid" alt="{{ img }}">
-                              </div>
+                        {% set cls_key = 'class_' ~ loop.index %}
+                        {% set imgs = class_img_map[task].get(cls_key, []) %}
+                        {% if imgs|length > 0 %}
+                          {% for img in imgs[:6] %}
+                          <div class="col-md-2 col-sm-4 mb-2">
+                            <div class="image-item-small">
+                              <img src="{{ url_for('static', filename='pred_vis/' + img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
-                            {% endfor %}
-                            {% if imgs|length > 6 %}
-                            <div class="col-12">
-                              <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
-                            </div>
-                            {% endif %}
+                          </div>
+                          {% endfor %}
+                          {% if imgs|length > 6 %}
+                          <div class="col-12">
+                            <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
+                          </div>
                           {% endif %}
-                        {% endfor %}
-                        {% if not imgs_found %}
+                        {% else %}
                         <div class="col-12">
                           <p class="text-muted small">图片已分类存储在对应文件夹中</p>
                         </div>

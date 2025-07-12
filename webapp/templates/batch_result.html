@@ -214,12 +214,6 @@
             <div class="accordion" id="defectAccordion">
               {% for classname, count in class_counts_mapped.items() %}
               {% if count > 0 %}
-              {% set filelist = [] %}
-              {% for cls_key, imgs in class_img_map_mapped.items() %}
-                {% if loop.index == loop.index0 + 1 %}
-                  {% set filelist = imgs %}
-                {% endif %}
-              {% endfor %}
               <div class="card mb-2">
                 <div class="card-header p-0" id="heading{{ loop.index }}">
                   <h2 class="mb-0">
@@ -239,8 +233,9 @@
                 <div id="collapse{{ loop.index }}" class="collapse" data-parent="#defectAccordion">
                   <div class="card-body">
                     <div class="row">
-                      {% for cls_key, imgs in class_img_map_mapped.items() %}
-                        {% if imgs|length > 0 %}
+                      {% set cls_key = 'class_' ~ loop.index %}
+                      {% set imgs = class_img_map_mapped.get(cls_key, []) %}
+                      {% if imgs|length > 0 %}
                           {% for filename in imgs[:12] %}
                           <div class="col-md-3 col-sm-6 mb-3">
                             <div class="image-item">
@@ -260,8 +255,7 @@
                             </p>
                           </div>
                           {% endif %}
-                        {% endif %}
-                      {% endfor %}
+                      {% endif %}
                     </div>
                   </div>
                 </div>
