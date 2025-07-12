@@ -207,8 +207,8 @@ def categorize_images(stats, class_img_map, task):
                     shutil.copy2(src_path, class_dir / img_name)
 
 
-def generate_pie_chart_base64(data, task, title="缺陷分布"):
-    """生成饼图并返回base64编码，使用更清新的颜色"""
+def generate_pie_chart_base64(data, task, title="缺陷分布", donut=False):
+    """生成饼图并返回base64编码, 可选是否生成环形图"""
     if not data or all(v == 0 for v in data.values()):
         return None
 
@@ -217,10 +217,7 @@ def generate_pie_chart_base64(data, task, title="缺陷分布"):
         color_map = {}
     else:
         color_map = CHART_COLOR_MAPS.get(task, {})
-    name_to_id = {
-        info["cn"]: int(cid)
-        for cid, info in TASK_INFO["tasks"].get(task, {}).get("class_names", {}).items()
-    }
+    name_to_id = {info["cn"]: int(cid) for cid, info in TASK_INFO["tasks"].get(task, {}).get("class_names", {}).items()}
 
     labels = []
     sizes = []
@@ -259,6 +256,7 @@ def generate_pie_chart_base64(data, task, title="缺陷分布"):
     # 创建饼图
     fig, ax = plt.subplots(figsize=(8, 6))
     if labels:
+        wedgeprops = {"width": 0.4, "edgecolor": "white"} if donut else None
         wedges, texts, autotexts = ax.pie(
             sizes,
             labels=labels,
@@ -266,7 +264,7 @@ def generate_pie_chart_base64(data, task, title="缺陷分布"):
             colors=colors,
             startangle=90,
             textprops={"fontsize": 12},
-            wedgeprops={"width": 0.4, "edgecolor": "white"},
+            wedgeprops=wedgeprops,
         )
         # 设置标签字体
         for text in texts:
@@ -308,9 +306,7 @@ def task_page(task):
         return redirect(url_for("index"))
     year = datetime.now().year
     task_info = TASK_INFO["tasks"].get(task, {})
-    return render_template(
-        "task.html", task=task, task_info=task_info, current_year=year
-    )
+    return render_template("task.html", task=task, task_info=task_info, current_year=year)
 
 
 @app.route("/task/<task>/single", methods=["POST"])
@@ -435,6 +431,7 @@ def result_batch():
         _progress["class_counts"],
         task,
         f"{task_info.get('task_name_cn', task)}缺陷分布",
+        donut=True,
     )
 
     year = datetime.now().year
@@ -494,14 +491,11 @@ def download_report():
                 colors=colors,
                 startangle=90,
                 textprops={"fontsize": 12},
-                wedgeprops={"width": 0.4, "edgecolor": "white"},
             )
             ax.set_title("任务类型分布", fontsize=16, weight="bold", pad=20)
 
             buf = io.BytesIO()
-            plt.savefig(
-                buf, format="png", dpi=150, bbox_inches="tight", facecolor="white"
-            )
+            plt.savefig(buf, format="png", dpi=150, bbox_inches="tight", facecolor="white")
             buf.seek(0)
             task_pie_base64 = base64.b64encode(buf.getvalue()).decode()
             plt.close(fig)
@@ -514,7 +508,10 @@ def download_report():
             "class_counts_all": _progress["class_counts"],
             "task_pie_charts": {
                 t: generate_pie_chart_base64(
-                    c, t, f"{TASK_INFO['tasks'][t]['task_name_cn']}缺陷分布"
+                    c,
+                    t,
+                    f"{TASK_INFO['tasks'][t]['task_name_cn']}缺陷分布",
+                    donut=False,
                 )
                 for t, c in _progress["class_counts"].items()
                 if any(v > 0 for v in c.values())
@@ -536,6 +533,7 @@ def download_report():
                 _progress["class_counts"],
                 task,
                 f"{TASK_INFO['tasks'][task]['task_name_cn']}缺陷分布",
+                donut=False,
             ),
             "current_datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "current_year": datetime.now().year,
@@ -590,9 +588,7 @@ def start_classify():
     def worker(path_list):
         classifier = load_classifier()
         # 初始化统计结构
-        task_stats = {
-            t: {"total_images": 0, "defect_images": 0} for t in SEGMENT_MODELS
-        }
+        task_stats = {t: {"total_images": 0, "defect_images": 0} for t in SEGMENT_MODELS}
         task_class_counts = {}
         task_class_img_map = {}
 
@@ -601,6 +597,7 @@ def start_classify():
             class_names = task_info.get("class_names", {})
             task_class_counts[t] = {}
             task_class_img_map[t] = {}
+            task_class_img_map[t]["no_defect"] = []
             for i in range(1, SEGMENT_MODELS[t]["classes"]):
                 cls_name = class_names.get(str(i), {}).get("cn", f"类别{i}")
                 task_class_counts[t][cls_name] = 0
@@ -619,11 +616,7 @@ def start_classify():
             (task_dir / "无缺陷").mkdir(exist_ok=True)
             # 为每个缺陷类型创建目录
             for i in range(1, SEGMENT_MODELS[t]["classes"]):
-                cls_name = (
-                    TASK_INFO["tasks"][t]["class_names"]
-                    .get(str(i), {})
-                    .get("cn", f"类别{i}")
-                )
+                cls_name = TASK_INFO["tasks"][t]["class_names"].get(str(i), {}).get("cn", f"类别{i}")
                 (task_dir / cls_name).mkdir(exist_ok=True)
 
         for path in path_list:
@@ -636,9 +629,7 @@ def start_classify():
             out_name = f"cls_{task}_{Path(path).name}"
             _, mask = seg_predict(path, task, out_name)
 
-            _progress["results"].append(
-                {"task": task, "image": out_name, "has_defect": np.any(mask > 0)}
-            )
+            _progress["results"].append({"task": task, "image": out_name, "has_defect": np.any(mask > 0)})
 
             task_stats[task]["total_images"] += 1
             task_cn = TASK_INFO["tasks"][task]["task_name_cn"]
@@ -648,17 +639,14 @@ def start_classify():
                 # 复制到对应缺陷文件夹
                 for c in np.unique(mask):
                     if c > 0:
-                        cls_name = (
-                            TASK_INFO["tasks"][task]["class_names"]
-                            .get(str(c), {})
-                            .get("cn", f"类别{c}")
-                        )
+                        cls_name = TASK_INFO["tasks"][task]["class_names"].get(str(c), {}).get("cn", f"类别{c}")
                         dst_path = classify_result_dir / task_cn / cls_name / out_name
                         shutil.copy2(PRED_DIR / out_name, dst_path)
             else:
                 # 复制到无缺陷文件夹
                 dst_path = classify_result_dir / task_cn / "无缺陷" / out_name
                 shutil.copy2(PRED_DIR / out_name, dst_path)
+                task_class_img_map[task]["no_defect"].append(out_name)
 
             task_info = TASK_INFO["tasks"].get(task, {})
             class_names = task_info.get("class_names", {})
@@ -712,16 +700,10 @@ def result_classify():
 
         labels = list(task_counts.keys())
         sizes = list(task_counts.values())
-        colors = [
-            task_colors.get(t, "#95a5a6")
-            for t in stats.keys()
-            if stats[t]["total_images"] > 0
-        ]
+        colors = [task_colors.get(t, "#95a5a6") for t in stats.keys() if stats[t]["total_images"] > 0]
 
         fig, ax = plt.subplots(figsize=(8, 6))
-        wedges, texts, autotexts = ax.pie(
-            sizes, labels=labels, autopct="%1.1f%%", colors=colors, startangle=90
-        )
+        wedges, texts, autotexts = ax.pie(sizes, labels=labels, autopct="%1.1f%%", colors=colors, startangle=90)
         # 设置字体
         for text in texts:
             text.set_fontsize(12)
@@ -733,9 +715,7 @@ def result_classify():
         ax.set_title("任务类型分布", fontsize=16, weight="bold", pad=20)
 
         buffer = io.BytesIO()
-        plt.savefig(
-            buffer, format="png", dpi=150, bbox_inches="tight", facecolor="white"
-        )
+        plt.savefig(buffer, format="png", dpi=150, bbox_inches="tight", facecolor="white")
         buffer.seek(0)
         task_pie_base64 = base64.b64encode(buffer.getvalue()).decode()
         plt.close(fig)
@@ -746,7 +726,10 @@ def result_classify():
         if any(cnt > 0 for cnt in counts.values()):
             # 生成该任务的缺陷分布饼图
             pie_base64 = generate_pie_chart_base64(
-                counts, t, f"{TASK_INFO['tasks'][t]['task_name_cn']}缺陷分布"
+                counts,
+                t,
+                f"{TASK_INFO['tasks'][t]['task_name_cn']}缺陷分布",
+                donut=True,
             )
             if pie_base64:
                 class_charts[t] = {

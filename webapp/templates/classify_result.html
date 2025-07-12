@@ -207,8 +207,28 @@
                       <span class="badge badge-success">{{ no_defect }} 张</span>
                       <i class="fas fa-images float-right"></i>
                     </div>
-                    <div class="image-preview" id="no-defect-{{ task }}" style="display: none;">
-                      <p class="text-muted small mt-2">合格产品图片存储在此文件夹中</p>
+                  <div class="image-preview" id="no-defect-{{ task }}" style="display: none;">
+                      <div class="row mt-3">
+                        {% set imgs = class_img_map[task].get('no_defect', []) %}
+                        {% if imgs|length > 0 %}
+                          {% for img in imgs[:6] %}
+                          <div class="col-md-2 col-sm-4 mb-2">
+                            <div class="image-item-small">
+                              <img src="{{ url_for('static', filename='pred_vis/' ~ img) }}" class="img-fluid" alt="{{ img }}">
+                            </div>
+                          </div>
+                          {% endfor %}
+                          {% if imgs|length > 6 %}
+                          <div class="col-12">
+                            <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
+                          </div>
+                          {% endif %}
+                        {% else %}
+                        <div class="col-12">
+                          <p class="text-muted small mt-2">合格产品图片存储在此文件夹中</p>
+                        </div>
+                        {% endif %}
+                      </div>
                     </div>
                   </div>
                   {% endif %}
