@@ -78,6 +78,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Generic charts defined via data attributes
+  document.querySelectorAll('[data-chart="pie"]').forEach(el => {
+    const data = JSON.parse(el.getAttribute('data-values'));
+    const colors = JSON.parse(el.getAttribute('data-colors'));
+    const title = el.getAttribute('data-title');
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+    const colorArr = labels.map(l => colors[l] || '#cccccc');
+    createPieChartGeneric(el, labels, values, colorArr, title);
+  });
+
   document.querySelectorAll('.card, .img-container').forEach((element, index) => {
     element.classList.add('fade-in');
     element.style.animationDelay = `${index * 0.1}s`;
@@ -209,4 +220,48 @@ function toggleFolderView(folderId) {
     folderIcon.classList.remove('fa-folder-open');
     folderIcon.classList.add('fa-folder');
   }
+}
+
+// 通用饼状图绘制函数
+function createPieChartGeneric(canvas, labels, values, colors, title) {
+  new Chart(canvas, {
+    type: 'pie',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderColor: 'white',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 20, font: { size: 14 } }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = Math.round((value / total) * 100);
+              return `${label}: ${value} 张 (${percentage}%)`;
+            }
+          }
+        },
+        title: {
+          display: !!title,
+          text: title,
+          font: { size: 18 },
+          padding: { top: 10, bottom: 30 }
+        }
+      },
+      animation: { animateScale: true, animateRotate: true, duration: 1000 }
+    }
+  });
 }
