@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
 import os
+import json
 from pathlib import Path
 import torch
 from torchvision import transforms
@@ -13,7 +14,7 @@ from reportlab.lib.pagesizes import A4
 
 from models.classifier import create_classifier
 from models.segmenter import get_unet_model
-from utils.viz import visualize_prediction_3d
+from utils.viz import visualize_prediction_3d, TASK_COLOR_MAPS
 
 app = Flask(__name__)
 
@@ -23,6 +24,18 @@ UPLOAD_DIR = BASE_DIR / 'static' / 'uploads'
 PRED_DIR = BASE_DIR / 'static' / 'pred_vis'
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 PRED_DIR.mkdir(parents=True, exist_ok=True)
+
+# 加载任务信息和颜色映射
+TASK_INFO_PATH = BASE_DIR / 'tasks_info.json'
+with open(TASK_INFO_PATH, 'r', encoding='utf-8') as f:
+    TASK_INFO = json.load(f)
+
+SOLAR_COLOR_MAP_PATH = BASE_DIR.parent / 'dataset' / 'solar-panel' / 'color_map.json'
+if SOLAR_COLOR_MAP_PATH.exists():
+    with open(SOLAR_COLOR_MAP_PATH, 'r', encoding='utf-8') as f:
+        SOLAR_COLOR_MAP = {int(k): tuple(v) for k, v in json.load(f).items()}
+else:
+    SOLAR_COLOR_MAP = {}
 
 # Mapping from task to segmentation model path and number of classes
 SEGMENT_MODELS = {
@@ -216,16 +229,34 @@ def download_report():
     stats = _progress['stats']
     y = 760
     c.setFont("Helvetica", 12)
-    c.drawString(50, y, f"总图片数: {stats['total_images']}")
-    y -= 20
-    c.drawString(50, y, f"有缺陷图片数: {stats['defect_images']}")
-    if _progress.get('class_counts'):
-        y -= 40
-        c.drawString(50, y, "各缺陷类型统计:")
+
+    if _progress['task'] == 'classify':
+        total = sum(v['total_images'] for v in stats.values())
+        c.drawString(50, y, f"总图片数: {total}")
         y -= 20
-        for cls, cnt in _progress['class_counts'].items():
-            c.drawString(70, y, f"{cls}: {cnt}")
+        for task, s in stats.items():
+            c.drawString(50, y, f"{task}: {s['total_images']} 张, 有缺陷 {s['defect_images']}")
             y -= 20
+        if _progress.get('class_counts'):
+            for task, counts in _progress['class_counts'].items():
+                y -= 20
+                c.drawString(50, y, f"{task} 缺陷统计:")
+                y -= 20
+                for cls, cnt in counts.items():
+                    if cnt > 0:
+                        c.drawString(70, y, f"{cls}: {cnt}")
+                        y -= 20
+    else:
+        c.drawString(50, y, f"总图片数: {stats['total_images']}")
+        y -= 20
+        c.drawString(50, y, f"有缺陷图片数: {stats['defect_images']}")
+        if _progress.get('class_counts'):
+            y -= 40
+            c.drawString(50, y, "各缺陷类型统计:")
+            y -= 20
+            for cls, cnt in _progress['class_counts'].items():
+                c.drawString(70, y, f"{cls}: {cnt}")
+                y -= 20
     c.save()
     return send_file(pdf_path, as_attachment=True)
 
@@ -258,6 +289,9 @@ def start_classify():
 
     def worker(path_list):
         classifier = load_classifier()
+        # 初始化统计结构
+        task_stats = {t: {'total_images': 0, 'defect_images': 0} for t in SEGMENT_MODELS}
+        task_class_counts = {t: {f'class_{i}': 0 for i in range(1, SEGMENT_MODELS[t]['classes'])} for t in SEGMENT_MODELS}
         for path in path_list:
             img = Image.open(path).convert('RGB')
             x = cls_tf(img).unsqueeze(0)
@@ -266,9 +300,20 @@ def start_classify():
             pred_idx = out.argmax(1).item()
             task = list(SEGMENT_MODELS.keys())[pred_idx]
             out_name = f"cls_{task}_{Path(path).name}"
-            seg_predict(path, task, out_name)
+            _, mask = seg_predict(path, task, out_name)
             _progress['results'].append({'task': task, 'image': out_name})
+            task_stats[task]['total_images'] += 1
+            if np.any(mask > 0):
+                task_stats[task]['defect_images'] += 1
+            unique = np.unique(mask)
+            for c in unique:
+                if c == 0:
+                    continue
+                key = f'class_{c}'
+                task_class_counts[task][key] += 1
             _progress['processed'] += 1
+        _progress['stats'] = task_stats
+        _progress['class_counts'] = task_class_counts
         _progress['done'] = True
 
     threading.Thread(target=worker, args=(saved_paths,)).start()
@@ -280,7 +325,46 @@ def result_classify():
     if not _progress['done'] or _progress.get('results') is None:
         return redirect(url_for('index'))
     year = datetime.now().year
-    return render_template('classify_result.html', results=_progress['results'], current_year=year)
+    stats = _progress.get('stats', {})
+    class_counts = _progress.get('class_counts', {})
+    # 任务颜色 (固定)
+    task_colors = {
+        'steel': '#e74c3c',
+        'phone': '#3498db',
+        'magnetic': '#2ecc71',
+        'solar-panel': '#9b59b6'
+    }
+    task_counts = {TASK_INFO['tasks'][t]['task_name_cn']: s['total_images'] for t, s in stats.items() if s['total_images'] > 0}
+
+    class_charts = {}
+    for t, counts in class_counts.items():
+        name_cn = TASK_INFO['tasks'][t]['task_name_cn']
+        names_map = TASK_INFO['tasks'][t]['class_names']
+        color_map = SOLAR_COLOR_MAP if t == 'solar-panel' else TASK_COLOR_MAPS.get(t, {})
+        data = {}
+        colors = {}
+        for key, cnt in counts.items():
+            if cnt == 0:
+                continue
+            cls_id = int(key.split('_')[1])
+            label = names_map.get(str(cls_id), {}).get('cn', key)
+            data[label] = cnt
+            rgb = color_map.get(cls_id, (128, 128, 128))
+            colors[label] = f'rgb({rgb[0]}, {rgb[1]}, {rgb[2]})'
+        class_charts[t] = {'name_cn': name_cn, 'counts': data, 'colors': colors}
+
+    results_by_task = {}
+    for item in _progress['results']:
+        results_by_task.setdefault(item['task'], []).append(item['image'])
+
+    return render_template(
+        'classify_result.html',
+        results_by_task=results_by_task,
+        task_counts=task_counts,
+        task_colors=task_colors,
+        class_charts=class_charts,
+        current_year=year
+    )
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
