@@ -13,9 +13,9 @@ from datetime import datetime
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from xhtml2pdf import pisa
-import pdfkit
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib import font_manager
 
 matplotlib.use("Agg")
 import base64
@@ -41,21 +41,21 @@ try:
     font_path = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
     if os.path.exists(font_path):
         pdfmetrics.registerFont(TTFont("SimHei", font_path))
+        font_manager.fontManager.addfont(font_path)
     else:
-        pdfmetrics.registerFont(TTFont("SimHei", "C:/Windows/Fonts/simhei.ttf"))
+        win_font = "C:/Windows/Fonts/simhei.ttf"
+        pdfmetrics.registerFont(TTFont("SimHei", win_font))
+        font_manager.fontManager.addfont(win_font)
+    plt.rcParams["font.sans-serif"] = ["SimHei", "Noto Sans CJK SC", "DejaVu Sans"]
+    plt.rcParams["axes.unicode_minus"] = False
 except Exception:
     pass
 
 
 def render_pdf_from_html(html_content, pdf_path):
-    """Render PDF using wkhtmltopdf if available, otherwise xhtml2pdf."""
-    wkhtmltopdf_path = shutil.which("wkhtmltopdf")
-    if wkhtmltopdf_path:
-        config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
-        pdfkit.from_string(html_content, str(pdf_path), configuration=config)
-    else:
-        with open(pdf_path, "wb") as f:
-            pisa.CreatePDF(html_content, dest=f)
+    """Render PDF using xhtml2pdf and embed Chinese fonts."""
+    with open(pdf_path, "wb") as f:
+        pisa.CreatePDF(html_content, dest=f, encoding="utf-8")
 
 
 # 加载任务信息和颜色映射

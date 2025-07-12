@@ -239,7 +239,7 @@
                           {% for filename in imgs[:12] %}
                           <div class="col-md-3 col-sm-6 mb-3">
                             <div class="image-item">
-                              <img src="{{ url_for('static', filename='pred_vis/' + filename) }}"
+                                <img src="{{ url_for('static', filename='pred_vis/' ~ filename) }}"
                                    class="img-fluid"
                                    alt="{{ filename }}"
                                    data-toggle="tooltip"

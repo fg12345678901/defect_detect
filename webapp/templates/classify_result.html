@@ -77,9 +77,12 @@
           <div class="card-body">
             <div class="row">
               <div class="col-md-6">
-                <div class="text-center">
-                  <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
-                </div>
+                  <div class="text-center">
+                    <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
+                    {% if task_pie_base64 %}
+                    <img src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
+                    {% endif %}
+                  </div>
               </div>
               <div class="col-md-6">
                 <table class="table">
@@ -127,9 +130,12 @@
           <div class="card-body">
             <div class="row">
               <div class="col-md-6">
-                <div class="text-center">
-                  <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
-                </div>
+                  <div class="text-center">
+                    <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
+                    {% if chart_data.pie_chart %}
+                    <img src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
+                    {% endif %}
+                  </div>
               </div>
               <div class="col-md-6">
                 <h5 class="mb-3">缺陷类型统计</h5>
@@ -225,7 +231,7 @@
                           {% for img in imgs[:6] %}
                           <div class="col-md-2 col-sm-4 mb-2">
                             <div class="image-item-small">
-                              <img src="{{ url_for('static', filename='pred_vis/' + img) }}" class="img-fluid" alt="{{ img }}">
+                              <img src="{{ url_for('static', filename='pred_vis/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
                           {% endfor %}
