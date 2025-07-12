@@ -77,9 +77,12 @@
           <div class="card-body">
             <div class="row">
               <div class="col-md-6">
-                <div class="text-center">
-                  <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
-                </div>
+                  <div class="text-center">
+                    <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
+                    {% if task_pie_base64 %}
+                    <img src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
+                    {% endif %}
+                  </div>
               </div>
               <div class="col-md-6">
                 <table class="table">
@@ -127,9 +130,12 @@
           <div class="card-body">
             <div class="row">
               <div class="col-md-6">
-                <div class="text-center">
-                  <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
-                </div>
+                  <div class="text-center">
+                    <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
+                    {% if chart_data.pie_chart %}
+                    <img src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
+                    {% endif %}
+                  </div>
               </div>
               <div class="col-md-6">
                 <h5 class="mb-3">缺陷类型统计</h5>
@@ -183,7 +189,7 @@
               {% for task, stat in stats.items() %}
               {% if stat.total_images > 0 %}
               <div class="folder-item ml-4">
-                <div class="folder-header" onclick="toggleFolder('task-{{ task }}')">
+                <div class="folder-header" onclick="toggleFolderView('task-{{ task }}')">
                   <i class="fas fa-folder mr-2"></i>
                   <strong>{{ task_info.tasks[task].task_name_cn }}/</strong>
                   <span class="badge badge-secondary">{{ stat.total_images }} 张</span>
@@ -195,14 +201,34 @@
                   {% set no_defect = stat.total_images - stat.defect_images %}
                   {% if no_defect > 0 %}
                   <div class="folder-item ml-4">
-                    <div class="folder-subheader" onclick="toggleImages('no-defect-{{ task }}')">
+                    <div class="folder-subheader" onclick="toggleFolderView('no-defect-{{ task }}')">
                       <i class="fas fa-folder mr-2 text-success"></i>
                       <span>无缺陷/</span>
                       <span class="badge badge-success">{{ no_defect }} 张</span>
                       <i class="fas fa-images float-right"></i>
                     </div>
-                    <div class="image-preview" id="no-defect-{{ task }}" style="display: none;">
-                      <p class="text-muted small mt-2">合格产品图片存储在此文件夹中</p>
+                  <div class="image-preview" id="no-defect-{{ task }}" style="display: none;">
+                      <div class="row mt-3">
+                        {% set imgs = class_img_map[task].get('no_defect', []) %}
+                        {% if imgs|length > 0 %}
+                          {% for img in imgs[:6] %}
+                          <div class="col-md-2 col-sm-4 mb-2">
+                            <div class="image-item-small">
+                              <img src="{{ url_for('static', filename='pred_vis/' ~ img) }}" class="img-fluid" alt="{{ img }}">
+                            </div>
+                          </div>
+                          {% endfor %}
+                          {% if imgs|length > 6 %}
+                          <div class="col-12">
+                            <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
+                          </div>
+                          {% endif %}
+                        {% else %}
+                        <div class="col-12">
+                          <p class="text-muted small mt-2">合格产品图片存储在此文件夹中</p>
+                        </div>
+                        {% endif %}
+                      </div>
                     </div>
                   </div>
                   {% endif %}
@@ -211,7 +237,7 @@
                   {% for cls_name, count in class_counts[task].items() %}
                   {% if count > 0 %}
                   <div class="folder-item ml-4">
-                    <div class="folder-subheader" onclick="toggleImages('defect-{{ task }}-{{ loop.index }}')">
+                    <div class="folder-subheader" onclick="toggleFolderView('defect-{{ task }}-{{ loop.index }}')">
                       <i class="fas fa-folder mr-2 text-warning"></i>
                       <span>{{ cls_name }}/</span>
                       <span class="badge badge-warning">{{ count }} 张</span>
@@ -225,7 +251,7 @@
                           {% for img in imgs[:6] %}
                           <div class="col-md-2 col-sm-4 mb-2">
                             <div class="image-item-small">
-                              <img src="{{ url_for('static', filename='pred_vis/' + img) }}" class="img-fluid" alt="{{ img }}">
+                              <img src="{{ url_for('static', filename='pred_vis/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
                           {% endfor %}
@@ -349,29 +375,6 @@
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
   <script>
-    // 文件夹展开/收起
-    function toggleFolder(folderId) {
-      const folder = document.getElementById(folderId);
-      const header = folder.previousElementSibling;
-
-      if (folder.style.display === 'none') {
-        folder.style.display = 'block';
-        header.classList.add('open');
-      } else {
-        folder.style.display = 'none';
-        header.classList.remove('open');
-      }
-    }
-
-    // 图片预览展开/收起
-    function toggleImages(imageId) {
-      const imageDiv = document.getElementById(imageId);
-      if (imageDiv.style.display === 'none') {
-        imageDiv.style.display = 'block';
-      } else {
-        imageDiv.style.display = 'none';
-      }
-    }
 
     // 创建任务分布饼图
     const taskColors = {

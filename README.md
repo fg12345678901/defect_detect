@@ -4,6 +4,7 @@
 
 ```bash
 pip install flask torch torchvision xhtml2pdf
+sudo apt-get install -y fonts-noto-cjk
 ```
 
 运行 `webapp/app.py` 即可启动服务。

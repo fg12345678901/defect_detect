@@ -3,9 +3,13 @@
 <head>
   <meta charset="utf-8">
   <title>{{ task_info.task_name_cn if task_info else '综合' }}缺陷检测报告</title>
-  <style>
+<style>
+    @font-face {
+      font-family: 'SimHei';
+      src: url('file:///usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc') format('truetype');
+    }
     body {
-      font-family: 'SimHei', 'Microsoft YaHei', Arial, sans-serif;
+      font-family: 'SimHei', 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif;
       margin: 0;
       padding: 0;
       color: #333;
@@ -295,6 +299,11 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if task_pie_base64 %}
+      <div class="chart-container">
+        <img src="data:image/png;base64,{{ task_pie_base64 }}" alt="任务分布图" width="400">
+      </div>
+      {% endif %}
     </div>
 
     {% for t, counts in class_counts_all.items() %}
@@ -327,6 +336,11 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if task_pie_charts[t] %}
+      <div style="text-align:center;margin-top:10px;">
+        <img src="data:image/png;base64,{{ task_pie_charts[t] }}" width="400" alt="pie">
+      </div>
+      {% endif %}
     </div>
     {% endif %}
     {% endfor %}
