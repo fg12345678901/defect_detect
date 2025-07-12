@@ -8,6 +8,9 @@ Dice / IoU 评估工具
 
 from __future__ import annotations
 import numpy as np
+import torch
+from tqdm import tqdm
+from sklearn.metrics import f1_score, classification_report
 
 
 def calc_dice(pred: np.ndarray, gt: np.ndarray, eps: float = 1e-7) -> float:
@@ -52,3 +55,37 @@ class DiceMeter(_BaseMeter):
 class IoUMeter(_BaseMeter):
     def update(self, pred_3d: np.ndarray, gt_3d: np.ndarray):
         super()._update_one(pred_3d, gt_3d, calc_iou)
+
+
+def evaluate_classifier(model, loader, criterion, device, class_names: list):
+    """
+    Evaluate a classification model and return loss, macro F1,
+    and a detailed report dict.
+    """
+    model.eval()
+    total_loss = 0.0
+    all_preds = []
+    all_labels = []
+    pbar = tqdm(loader, desc="Evaluating", leave=False)
+    with torch.no_grad():
+        for imgs, labels in pbar:
+            imgs, labels = imgs.to(device), labels.to(device)
+            outputs = model(imgs)
+            loss = criterion(outputs, labels)
+            total_loss += loss.item()
+            preds = outputs.argmax(dim=1)
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
+    avg_loss = total_loss / len(loader)
+    macro_f1 = f1_score(all_labels, all_preds, average="macro", zero_division=0)
+
+    report_dict = classification_report(
+        all_labels,
+        all_preds,
+        target_names=class_names,
+        output_dict=True,
+        zero_division=0
+    )
+
+    return avg_loss, macro_f1, report_dict
