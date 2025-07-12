@@ -12,7 +12,7 @@ import threading
 from datetime import datetime
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from xhtml2pdf import pisa
+import pdfkit
 import matplotlib.pyplot as plt
 import matplotlib
 
@@ -174,6 +174,10 @@ def generate_pie_chart_base64(data, task, title='缺陷分布'):
         color_map = SOLAR_COLOR_MAP
     else:
         color_map = TASK_COLOR_MAPS.get(task, {})
+    name_to_id = {
+        info['cn']: int(cid)
+        for cid, info in TASK_INFO['tasks'].get(task, {}).get('class_names', {}).items()
+    }
 
     labels = []
     sizes = []
@@ -183,17 +187,18 @@ def generate_pie_chart_base64(data, task, title='缺陷分布'):
         if v > 0:
             labels.append(k)
             sizes.append(v)
-            # 获取原始颜色并调整为更清新的颜色
+            # 根据类别编号选择颜色
+            cls_id = None
             if 'class_' in k:
                 cls_id = int(k.split('_')[1])
+            else:
+                cls_id = name_to_id.get(k)
+            if cls_id is not None:
                 rgb = color_map.get(cls_id, (128, 128, 128))
-                # 调整颜色使其更清新（增加亮度，降低饱和度）
                 r, g, b = rgb
-                # 转换为HSV，调整后再转回RGB
                 r_norm = r / 255.0
                 g_norm = g / 255.0
                 b_norm = b / 255.0
-                # 简单的颜色调整：增加亮度
                 r_new = min(1.0, r_norm * 0.7 + 0.3)
                 g_new = min(1.0, g_norm * 0.7 + 0.3)
                 b_new = min(1.0, b_norm * 0.7 + 0.3)
@@ -423,13 +428,13 @@ def download_report():
         # 渲染report.html模板
         html_content = render_template('report.html', **report_data)
 
-    # 使用xhtml2pdf将HTML转换为PDF
+    # 使用wkhtmltopdf通过 pdfkit 生成 PDF
     report_dir = BASE_DIR / 'static' / 'reports'
     report_dir.mkdir(parents=True, exist_ok=True)
     pdf_path = report_dir / f'report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
 
-    with open(pdf_path, 'wb') as f:
-        pisa.CreatePDF(html_content, dest=f)
+    # pdfkit 需要系统安装 wkhtmltopdf
+    pdfkit.from_string(html_content, str(pdf_path))
 
     return send_file(pdf_path, as_attachment=True,
                      download_name=f"检测报告_{datetime.now().strftime('%Y%m%d')}.pdf")

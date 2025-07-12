@@ -328,13 +328,12 @@
       this.classList.remove('dragover');
       const files = e.dataTransfer.files;
       if (files && files.length > 0) {
-        // 将拖入的文件赋给隐藏的 input
+        handleFiles(files);
         const dt = new DataTransfer();
         for (let i = 0; i < files.length; i++) {
           dt.items.add(files[i]);
         }
         fileInput.files = dt.files;
-        handleFiles(fileInput.files);
       }
     });
 

@@ -475,6 +475,35 @@ body {
 .defect-magnetic-4 { background: rgba(255, 255, 0, 0.2); color: #888800; }
 .defect-magnetic-5 { background: rgba(128, 0, 255, 0.2); color: #6600cc; }
 
+.defect-solar-panel-1 { background: hsla(0, 70%, 85%, 0.6); color: hsl(0, 70%, 30%); }
+.defect-solar-panel-2 { background: hsla(12, 70%, 85%, 0.6); color: hsl(12, 70%, 30%); }
+.defect-solar-panel-3 { background: hsla(24, 70%, 85%, 0.6); color: hsl(24, 70%, 30%); }
+.defect-solar-panel-4 { background: hsla(37, 70%, 85%, 0.6); color: hsl(37, 70%, 30%); }
+.defect-solar-panel-5 { background: hsla(49, 70%, 85%, 0.6); color: hsl(49, 70%, 30%); }
+.defect-solar-panel-6 { background: hsla(62, 70%, 85%, 0.6); color: hsl(62, 70%, 30%); }
+.defect-solar-panel-7 { background: hsla(74, 70%, 85%, 0.6); color: hsl(74, 70%, 30%); }
+.defect-solar-panel-8 { background: hsla(86, 70%, 85%, 0.6); color: hsl(86, 70%, 30%); }
+.defect-solar-panel-9 { background: hsla(99, 70%, 85%, 0.6); color: hsl(99, 70%, 30%); }
+.defect-solar-panel-10 { background: hsla(111, 70%, 85%, 0.6); color: hsl(111, 70%, 30%); }
+.defect-solar-panel-11 { background: hsla(124, 70%, 85%, 0.6); color: hsl(124, 70%, 30%); }
+.defect-solar-panel-12 { background: hsla(136, 70%, 85%, 0.6); color: hsl(136, 70%, 30%); }
+.defect-solar-panel-13 { background: hsla(148, 70%, 85%, 0.6); color: hsl(148, 70%, 30%); }
+.defect-solar-panel-14 { background: hsla(161, 70%, 85%, 0.6); color: hsl(161, 70%, 30%); }
+.defect-solar-panel-15 { background: hsla(173, 70%, 85%, 0.6); color: hsl(173, 70%, 30%); }
+.defect-solar-panel-16 { background: hsla(186, 70%, 85%, 0.6); color: hsl(186, 70%, 30%); }
+.defect-solar-panel-17 { background: hsla(198, 70%, 85%, 0.6); color: hsl(198, 70%, 30%); }
+.defect-solar-panel-18 { background: hsla(211, 70%, 85%, 0.6); color: hsl(211, 70%, 30%); }
+.defect-solar-panel-19 { background: hsla(223, 70%, 85%, 0.6); color: hsl(223, 70%, 30%); }
+.defect-solar-panel-20 { background: hsla(235, 70%, 85%, 0.6); color: hsl(235, 70%, 30%); }
+.defect-solar-panel-21 { background: hsla(248, 70%, 85%, 0.6); color: hsl(248, 70%, 30%); }
+.defect-solar-panel-22 { background: hsla(260, 70%, 85%, 0.6); color: hsl(260, 70%, 30%); }
+.defect-solar-panel-23 { background: hsla(273, 70%, 85%, 0.6); color: hsl(273, 70%, 30%); }
+.defect-solar-panel-24 { background: hsla(285, 70%, 85%, 0.6); color: hsl(285, 70%, 30%); }
+.defect-solar-panel-25 { background: hsla(297, 70%, 85%, 0.6); color: hsl(297, 70%, 30%); }
+.defect-solar-panel-26 { background: hsla(310, 70%, 85%, 0.6); color: hsl(310, 70%, 30%); }
+.defect-solar-panel-27 { background: hsla(322, 70%, 85%, 0.6); color: hsl(322, 70%, 30%); }
+.defect-solar-panel-28 { background: hsla(335, 70%, 85%, 0.6); color: hsl(335, 70%, 30%); }
+.defect-solar-panel-29 { background: hsla(347, 70%, 85%, 0.6); color: hsl(347, 70%, 30%); }
 /* 图表容器 */
 .chart-container {
   background: white;
