@@ -12,7 +12,7 @@ import threading
 from datetime import datetime
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from xhtml2pdf import pisa
+import pdfkit
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib import font_manager
@@ -63,9 +63,22 @@ except Exception:
 
 
 def render_pdf_from_html(html_content, pdf_path):
-    """Render PDF using xhtml2pdf and embed Chinese fonts."""
-    with open(pdf_path, "wb") as f:
-        pisa.CreatePDF(html_content, dest=f, encoding="utf-8")
+    """Render PDF using wkhtmltopdf via pdfkit for better Chinese support."""
+    candidates = [
+        os.environ.get("WKHTMLTOPDF_PATH"),
+        shutil.which("wkhtmltopdf"),
+        "/usr/local/bin/wkhtmltopdf",
+        "/usr/bin/wkhtmltopdf",
+        "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe",
+        "C:\\Program Files (x86)\\wkhtmltopdf\\bin\\wkhtmltopdf.exe",
+    ]
+    wkhtml = next((p for p in candidates if p and os.path.exists(p)), None)
+    config = pdfkit.configuration(wkhtmltopdf=wkhtml) if wkhtml else None
+    options = {
+        "encoding": "UTF-8",
+        "enable-local-file-access": None,
+    }
+    pdfkit.from_string(html_content, str(pdf_path), configuration=config, options=options)
 
 
 # 加载任务信息和颜色映射
