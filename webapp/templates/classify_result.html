@@ -80,9 +80,7 @@
                   <div class="text-center">
                     <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
                     {% if task_pie_base64 %}
-                    <noscript>
-                      <img src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
-                    </noscript>
+                    <img src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
                     {% endif %}
                   </div>
               </div>
@@ -135,9 +133,7 @@
                   <div class="text-center">
                     <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
                     {% if chart_data.pie_chart %}
-                    <noscript>
-                      <img src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
-                    </noscript>
+                    <img src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
                     {% endif %}
                   </div>
               </div>
@@ -215,16 +211,16 @@
                       <div class="row mt-3">
                         {% set imgs = class_img_map[task].get('no_defect', []) %}
                         {% if imgs|length > 0 %}
-                          {% for img in imgs[:12] %}
+                          {% for img in imgs[:6] %}
                           <div class="col-md-2 col-sm-4 mb-2">
                             <div class="image-item-small">
                               <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/无缺陷/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
                           {% endfor %}
-                          {% if imgs|length > 12 %}
+                          {% if imgs|length > 6 %}
                           <div class="col-12">
-                            <p class="text-muted small">还有 {{ imgs|length - 12 }} 张图片...</p>
+                            <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
                           </div>
                           {% endif %}
                         {% else %}
@@ -252,16 +248,16 @@
                         {% set cls_key = 'class_' ~ loop.index %}
                         {% set imgs = class_img_map[task].get(cls_key, []) %}
                         {% if imgs|length > 0 %}
-                          {% for img in imgs[:12] %}
+                          {% for img in imgs[:6] %}
                           <div class="col-md-2 col-sm-4 mb-2">
                             <div class="image-item-small">
                               <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/' ~ cls_name ~ '/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
                           {% endfor %}
-                          {% if imgs|length > 12 %}
+                          {% if imgs|length > 6 %}
                           <div class="col-12">
-                            <p class="text-muted small">还有 {{ imgs|length - 12 }} 张图片...</p>
+                            <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
                           </div>
                           {% endif %}
                         {% else %}
