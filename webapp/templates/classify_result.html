@@ -80,7 +80,7 @@
                   <div class="text-center">
                     <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
                     {% if task_pie_base64 %}
-                    <img id="taskChartFallback" src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
+                    <img id="taskChartFallback" src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图" style="display:none;">
                     {% endif %}
                   </div>
               </div>
@@ -133,7 +133,7 @@
                   <div class="text-center">
                     <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
                     {% if chart_data.pie_chart %}
-                    <img id="defectChartFallback-{{ task }}" src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
+                    <img id="defectChartFallback-{{ task }}" src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图" style="display:none;">
                     {% endif %}
                   </div>
               </div>
@@ -205,7 +205,7 @@
                       <i class="fas fa-folder mr-2 text-success"></i>
                       <span>无缺陷/</span>
                       <span class="badge badge-success">{{ no_defect }} 张</span>
-                      <i class="fas fa-images float-right"></i>
+                      <i class="fas fa-chevron-down float-right"></i>
                     </div>
                   <div class="image-preview" id="no-defect-{{ task }}" style="display: none;">
                       <div class="row mt-3">
@@ -213,7 +213,7 @@
                         {% if imgs|length > 0 %}
                           {% for img in imgs[:10] %}
                           <div class="col-md-2 col-sm-4 mb-2">
-                            <div class="image-item-small">
+                            <div class="image-item">
                               <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/无缺陷/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
@@ -241,7 +241,7 @@
                       <i class="fas fa-folder mr-2 text-warning"></i>
                       <span>{{ cls_name }}/</span>
                       <span class="badge badge-warning">{{ count }} 张</span>
-                      <i class="fas fa-images float-right"></i>
+                      <i class="fas fa-chevron-down float-right"></i>
                     </div>
                   <div class="image-preview" id="defect-{{ task }}-{{ loop.index }}" style="display: none;">
                       <div class="row mt-3">
@@ -250,7 +250,7 @@
                         {% if imgs|length > 0 %}
                           {% for img in imgs[:10] %}
                           <div class="col-md-2 col-sm-4 mb-2">
-                            <div class="image-item-small">
+                            <div class="image-item">
                               <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/' ~ cls_name ~ '/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
@@ -348,17 +348,6 @@
       border: 1px solid #dee2e6;
     }
 
-    .image-item-small {
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      overflow: hidden;
-      transition: transform 0.2s;
-    }
-
-    .image-item-small:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
   </style>
 
   <!-- 页脚 -->
@@ -405,38 +394,41 @@
     {% endif %}
     {% endfor %}
 
-    if (typeof Chart !== 'undefined') {
-      new Chart(taskCtx, {
-        type: 'doughnut',
-        data: taskData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: { duration: 800 },
-          plugins: {
-            legend: {
-            position: 'bottom',
-            labels: {
-              padding: 15,
-              font: { size: 14 }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = ((value / total) * 100).toFixed(1);
-                return `${label}: ${value} 张 (${percentage}%)`;
+    const taskFallback = document.getElementById('taskChartFallback');
+    try {
+      if (typeof Chart !== 'undefined' && taskData.labels.length > 0) {
+        new Chart(taskCtx, {
+          type: 'doughnut',
+          data: taskData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 800 },
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { padding: 15, font: { size: 14 } }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed || 0;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    return `${label}: ${value} 张 (${percentage}%)`;
+                  }
+                }
               }
             }
           }
-        }
+        });
+        if (taskFallback) taskFallback.style.display = 'none';
+      } else if (taskFallback) {
+        taskFallback.style.display = 'block';
       }
-      });
-      const fallbackImg = document.getElementById('taskChartFallback');
-      if (fallbackImg) fallbackImg.style.display = 'none';
+    } catch (err) {
+      if (taskFallback) taskFallback.style.display = 'block';
     }
 
     // 创建各任务的缺陷分布饼图
@@ -501,38 +493,41 @@
     {% endif %}
     {% endfor %}
 
-    if (typeof Chart !== 'undefined') {
-      new Chart(ctx{{ task|replace('-', '_') }}, {
-        type: 'doughnut',
-        data: data{{ task|replace('-', '_') }},
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: { duration: 800 },
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 10,
-              font: { size: 12 }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = ((value / total) * 100).toFixed(1);
-                return `${label}: ${value} 张 (${percentage}%)`;
+    const fall{{ task|replace('-', '_') }} = document.getElementById('defectChartFallback-{{ task }}');
+    try {
+      if (typeof Chart !== 'undefined' && data{{ task|replace('-', '_') }}.labels.length > 0) {
+        new Chart(ctx{{ task|replace('-', '_') }}, {
+          type: 'doughnut',
+          data: data{{ task|replace('-', '_') }},
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 800 },
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { padding: 10, font: { size: 12 } }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed || 0;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    return `${label}: ${value} 张 (${percentage}%)`;
+                  }
+                }
               }
             }
           }
-        }
+        });
+        if (fall{{ task|replace('-', '_') }}) fall{{ task|replace('-', '_') }}.style.display = 'none';
+      } else if (fall{{ task|replace('-', '_') }}) {
+        fall{{ task|replace('-', '_') }}.style.display = 'block';
       }
-      });
-      const fall{{ task|replace('-', '_') }} = document.getElementById('defectChartFallback-{{ task }}');
-      if (fall{{ task|replace('-', '_') }}) fall{{ task|replace('-', '_') }}.style.display = 'none';
+    } catch (err) {
+      if (fall{{ task|replace('-', '_') }}) fall{{ task|replace('-', '_') }}.style.display = 'block';
     }
     {% endfor %}
 
