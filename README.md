@@ -4,6 +4,7 @@
 
 ```bash
 pip install flask torch torchvision xhtml2pdf
+# 为了在生成的 PDF 中正确显示中文，需要安装中文字体
 sudo apt-get install -y fonts-noto-cjk
 ```
 

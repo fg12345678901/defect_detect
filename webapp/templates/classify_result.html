@@ -79,9 +79,6 @@
               <div class="col-md-6">
                   <div class="text-center">
                     <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
-                    {% if task_pie_base64 %}
-                    <img src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
-                    {% endif %}
                   </div>
               </div>
               <div class="col-md-6">
@@ -132,9 +129,6 @@
               <div class="col-md-6">
                   <div class="text-center">
                     <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
-                    {% if chart_data.pie_chart %}
-                    <img src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
-                    {% endif %}
                   </div>
               </div>
               <div class="col-md-6">
@@ -410,6 +404,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: { duration: 800 },
         plugins: {
           legend: {
             position: 'bottom',
@@ -501,6 +496,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: { duration: 800 },
         plugins: {
           legend: {
             position: 'bottom',
