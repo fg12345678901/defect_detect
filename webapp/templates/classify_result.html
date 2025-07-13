@@ -214,7 +214,7 @@
                           {% for img in imgs[:6] %}
                           <div class="col-md-2 col-sm-4 mb-2">
                             <div class="image-item-small">
-                              <img src="{{ url_for('static', filename='pred_vis/' ~ img) }}" class="img-fluid" alt="{{ img }}">
+                              <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/无缺陷/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
                           {% endfor %}
@@ -251,7 +251,7 @@
                           {% for img in imgs[:6] %}
                           <div class="col-md-2 col-sm-4 mb-2">
                             <div class="image-item-small">
-                              <img src="{{ url_for('static', filename='pred_vis/' ~ img) }}" class="img-fluid" alt="{{ img }}">
+                              <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/' ~ cls_name ~ '/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
                           {% endfor %}
