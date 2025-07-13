@@ -405,15 +405,16 @@
     {% endif %}
     {% endfor %}
 
-    new Chart(taskCtx, {
-      type: 'doughnut',
-      data: taskData,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 800 },
-        plugins: {
-          legend: {
+    if (typeof Chart !== 'undefined') {
+      new Chart(taskCtx, {
+        type: 'doughnut',
+        data: taskData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 800 },
+          plugins: {
+            legend: {
             position: 'bottom',
             labels: {
               padding: 15,
@@ -433,9 +434,10 @@
           }
         }
       }
-    });
-    const fallbackImg = document.getElementById('taskChartFallback');
-    if (fallbackImg) fallbackImg.style.display = 'none';
+      });
+      const fallbackImg = document.getElementById('taskChartFallback');
+      if (fallbackImg) fallbackImg.style.display = 'none';
+    }
 
     // 创建各任务的缺陷分布饼图
     {% for task, chart_data in class_charts.items() %}
@@ -499,13 +501,14 @@
     {% endif %}
     {% endfor %}
 
-    new Chart(ctx{{ task|replace('-', '_') }}, {
-      type: 'doughnut',
-      data: data{{ task|replace('-', '_') }},
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 800 },
+    if (typeof Chart !== 'undefined') {
+      new Chart(ctx{{ task|replace('-', '_') }}, {
+        type: 'doughnut',
+        data: data{{ task|replace('-', '_') }},
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 800 },
         plugins: {
           legend: {
             position: 'bottom',
@@ -527,9 +530,10 @@
           }
         }
       }
-    });
-    const fall{{ task|replace('-', '_') }} = document.getElementById('defectChartFallback-{{ task }}');
-    if (fall{{ task|replace('-', '_') }}) fall{{ task|replace('-', '_') }}.style.display = 'none';
+      });
+      const fall{{ task|replace('-', '_') }} = document.getElementById('defectChartFallback-{{ task }}');
+      if (fall{{ task|replace('-', '_') }}) fall{{ task|replace('-', '_') }}.style.display = 'none';
+    }
     {% endfor %}
 
     // 启用工具提示

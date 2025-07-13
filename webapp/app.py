@@ -64,8 +64,16 @@ except Exception:
 
 def render_pdf_from_html(html_content, pdf_path):
     """Render PDF using wkhtmltopdf via pdfkit for better Chinese support."""
-    wkhtml = shutil.which("wkhtmltopdf") or "/usr/bin/wkhtmltopdf"
-    config = pdfkit.configuration(wkhtmltopdf=wkhtml) if os.path.exists(wkhtml) else None
+    candidates = [
+        os.environ.get("WKHTMLTOPDF_PATH"),
+        shutil.which("wkhtmltopdf"),
+        "/usr/local/bin/wkhtmltopdf",
+        "/usr/bin/wkhtmltopdf",
+        "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe",
+        "C:\\Program Files (x86)\\wkhtmltopdf\\bin\\wkhtmltopdf.exe",
+    ]
+    wkhtml = next((p for p in candidates if p and os.path.exists(p)), None)
+    config = pdfkit.configuration(wkhtmltopdf=wkhtml) if wkhtml else None
     options = {
         "encoding": "UTF-8",
         "enable-local-file-access": None,
