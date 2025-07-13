@@ -79,9 +79,6 @@
               <div class="col-md-6">
                   <div class="text-center">
                     <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
-                    {% if task_pie_base64 %}
-                    <img id="taskChartFallback" src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
-                    {% endif %}
                   </div>
               </div>
               <div class="col-md-6">
@@ -132,9 +129,6 @@
               <div class="col-md-6">
                   <div class="text-center">
                     <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
-                    {% if chart_data.pie_chart %}
-                    <img id="defectChartFallback-{{ task }}" src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
-                    {% endif %}
                   </div>
               </div>
               <div class="col-md-6">
@@ -213,7 +207,7 @@
                         {% if imgs|length > 0 %}
                           {% for img in imgs[:10] %}
                           <div class="col-md-2 col-sm-4 mb-2">
-                            <div class="image-item-small">
+                            <div class="image-item">
                               <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/无缺陷/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
@@ -250,7 +244,7 @@
                         {% if imgs|length > 0 %}
                           {% for img in imgs[:10] %}
                           <div class="col-md-2 col-sm-4 mb-2">
-                            <div class="image-item-small">
+                            <div class="image-item">
                               <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/' ~ cls_name ~ '/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
@@ -348,17 +342,6 @@
       border: 1px solid #dee2e6;
     }
 
-    .image-item-small {
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      overflow: hidden;
-      transition: transform 0.2s;
-    }
-
-    .image-item-small:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
   </style>
 
   <!-- 页脚 -->
@@ -435,8 +418,6 @@
         }
       }
       });
-      const fallbackImg = document.getElementById('taskChartFallback');
-      if (fallbackImg) fallbackImg.style.display = 'none';
     }
 
     // 创建各任务的缺陷分布饼图
@@ -531,8 +512,6 @@
         }
       }
       });
-      const fall{{ task|replace('-', '_') }} = document.getElementById('defectChartFallback-{{ task }}');
-      if (fall{{ task|replace('-', '_') }}) fall{{ task|replace('-', '_') }}.style.display = 'none';
     }
     {% endfor %}
 
