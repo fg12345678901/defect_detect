@@ -9,6 +9,7 @@ sudo apt-get install -y fonts-noto-cjk
 sudo apt-get install -y wkhtmltopdf
 # 如果 wkhtmltopdf 安装在其他位置，可通过环境变量指定路径
 export WKHTMLTOPDF_PATH=/path/to/wkhtmltopdf
+# Windows 用户请确保系统安装有 "SimHei" 或其他中文字体，以便 PDF 正确显示中文。
 ```
 
 运行 `webapp/app.py` 即可启动服务。
