@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <!-- 添加 Chart.js -->
-  <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chart.min.js') }}" defer></script>
 </head>
 <body>
   <!-- 导航栏 -->
@@ -80,7 +80,7 @@
                   <div class="text-center">
                     <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
                     {% if task_pie_base64 %}
-                    <img src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
+                    <img id="taskChartFallback" src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
                     {% endif %}
                   </div>
               </div>
@@ -133,7 +133,7 @@
                   <div class="text-center">
                     <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
                     {% if chart_data.pie_chart %}
-                    <img src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
+                    <img id="defectChartFallback-{{ task }}" src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
                     {% endif %}
                   </div>
               </div>
@@ -211,16 +211,16 @@
                       <div class="row mt-3">
                         {% set imgs = class_img_map[task].get('no_defect', []) %}
                         {% if imgs|length > 0 %}
-                          {% for img in imgs[:6] %}
+                          {% for img in imgs[:10] %}
                           <div class="col-md-2 col-sm-4 mb-2">
                             <div class="image-item-small">
                               <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/无缺陷/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
                           {% endfor %}
-                          {% if imgs|length > 6 %}
+                          {% if imgs|length > 10 %}
                           <div class="col-12">
-                            <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
+                            <p class="text-muted small">还有 {{ imgs|length - 10 }} 张图片...</p>
                           </div>
                           {% endif %}
                         {% else %}
@@ -248,16 +248,16 @@
                         {% set cls_key = 'class_' ~ loop.index %}
                         {% set imgs = class_img_map[task].get(cls_key, []) %}
                         {% if imgs|length > 0 %}
-                          {% for img in imgs[:6] %}
+                          {% for img in imgs[:10] %}
                           <div class="col-md-2 col-sm-4 mb-2">
                             <div class="image-item-small">
                               <img src="{{ url_for('static', filename='categorized/auto_classify/' ~ task_info.tasks[task].task_name_cn ~ '/' ~ cls_name ~ '/' ~ img) }}" class="img-fluid" alt="{{ img }}">
                             </div>
                           </div>
                           {% endfor %}
-                          {% if imgs|length > 6 %}
+                          {% if imgs|length > 10 %}
                           <div class="col-12">
-                            <p class="text-muted small">还有 {{ imgs|length - 6 }} 张图片...</p>
+                            <p class="text-muted small">还有 {{ imgs|length - 10 }} 张图片...</p>
                           </div>
                           {% endif %}
                         {% else %}
@@ -434,6 +434,8 @@
         }
       }
     });
+    const fallbackImg = document.getElementById('taskChartFallback');
+    if (fallbackImg) fallbackImg.style.display = 'none';
 
     // 创建各任务的缺陷分布饼图
     {% for task, chart_data in class_charts.items() %}
@@ -526,6 +528,8 @@
         }
       }
     });
+    const fall{{ task|replace('-', '_') }} = document.getElementById('defectChartFallback-{{ task }}');
+    if (fall{{ task|replace('-', '_') }}) fall{{ task|replace('-', '_') }}.style.display = 'none';
     {% endfor %}
 
     // 启用工具提示
