@@ -12,7 +12,7 @@ import threading
 from datetime import datetime
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-import pdfkit
+from xhtml2pdf import pisa
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib import font_manager
@@ -63,34 +63,9 @@ except Exception:
 
 
 def render_pdf_from_html(html_content, pdf_path):
-    """Render PDF using wkhtmltopdf via pdfkit for better Chinese support."""
-    candidates = [
-        os.environ.get("WKHTMLTOPDF_PATH"),
-        shutil.which("wkhtmltopdf"),
-        "/usr/local/bin/wkhtmltopdf",
-        "/usr/bin/wkhtmltopdf",
-        "C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe",
-        "C:\\Program Files (x86)\\wkhtmltopdf\\bin\\wkhtmltopdf.exe",
-    ]
-    wkhtml = next((p for p in candidates if p and os.path.exists(p)), None)
-    config = pdfkit.configuration(wkhtmltopdf=wkhtml) if wkhtml else None
-
-    # Embed a Chinese font if available to ensure proper rendering
-    font_candidates = [
-        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-        "C:/Windows/Fonts/simhei.ttf",
-    ]
-    font_path = next((p for p in font_candidates if os.path.exists(p)), None)
-    if font_path:
-        with open(font_path, "rb") as f:
-            b64_font = base64.b64encode(f.read()).decode()
-        font_style = (
-            "<style>@font-face{font-family:'SimHeiEmbed';src:url(data:font/ttf;base64,"
-            + b64_font + ") format('truetype');}</style>"
-        )
-        html_content = font_style + html_content
-    options = {"encoding": "UTF-8", "enable-local-file-access": None}
-    pdfkit.from_string(html_content, str(pdf_path), configuration=config, options=options)
+    """Render PDF using xhtml2pdf and embed Chinese fonts."""
+    with open(pdf_path, "wb") as f:
+        pisa.CreatePDF(html_content, dest=f, encoding="utf-8")
 
 
 # 加载任务信息和颜色映射

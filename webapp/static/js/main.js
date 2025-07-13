@@ -47,7 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.image-item').forEach(item => {
     item.addEventListener('click', function() {
       const imgSrc = this.querySelector('img').src;
-      const imgName = this.querySelector('.small')?.textContent || 'Image';
+      const nameElem = this.querySelector('.small');
+      const imgName = nameElem ? nameElem.textContent : 'Image';
       createImageModal(imgSrc, imgName);
     });
   });
@@ -107,18 +108,18 @@ function createImageModal(imgSrc, imgName) {
 // 切换文件夹视图
 function toggleFolderView(folderId) {
   const folderContent = document.getElementById(folderId);
-  const folderHeader = folderContent?.previousElementSibling;
-  const icon = folderHeader?.querySelector('i.fa-chevron-down');
+  const folderHeader = folderContent ? folderContent.previousElementSibling : null;
+  const icon = folderHeader ? folderHeader.querySelector('i.fa-chevron-down') : null;
 
   if (folderContent && icon) {
     if (folderContent.style.display === 'none') {
       folderContent.style.display = 'block';
       icon.style.transform = 'rotate(180deg)';
-      folderHeader?.classList.add('open');
+      if (folderHeader) folderHeader.classList.add('open');
     } else {
       folderContent.style.display = 'none';
       icon.style.transform = 'rotate(0)';
-      folderHeader?.classList.remove('open');
+      if (folderHeader) folderHeader.classList.remove('open');
     }
   }
 }
