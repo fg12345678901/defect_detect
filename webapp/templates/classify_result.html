@@ -79,6 +79,9 @@
               <div class="col-md-6">
                   <div class="text-center">
                     <canvas id="taskChart" style="max-width: 400px; margin: 0 auto;"></canvas>
+                    {% if task_pie_base64 %}
+                    <img src="data:image/png;base64,{{ task_pie_base64 }}" class="img-fluid mt-3" alt="任务分布图">
+                    {% endif %}
                   </div>
               </div>
               <div class="col-md-6">
@@ -129,6 +132,9 @@
               <div class="col-md-6">
                   <div class="text-center">
                     <canvas id="defectChart-{{ task }}" style="max-width: 400px; margin: 0 auto;"></canvas>
+                    {% if chart_data.pie_chart %}
+                    <img src="data:image/png;base64,{{ chart_data.pie_chart }}" class="img-fluid mt-3" alt="缺陷分布图">
+                    {% endif %}
                   </div>
               </div>
               <div class="col-md-6">
@@ -394,7 +400,8 @@
     taskData.labels.push('{{ task_info.tasks[task].task_name_cn }}');
     taskData.datasets[0].data.push({{ stat.total_images }});
     taskData.datasets[0].backgroundColor.push(taskColors['{{ task }}'] || 'rgba(149, 165, 166, 0.7)');
-    taskData.datasets[0].borderColor.push(taskColors['{{ task }}']?.replace('0.7', '1') || 'rgba(149, 165, 166, 1)');
+    const color = taskColors['{{ task }}'];
+    taskData.datasets[0].borderColor.push(color ? color.replace('0.7', '1') : 'rgba(149, 165, 166, 1)');
     {% endif %}
     {% endfor %}
 
