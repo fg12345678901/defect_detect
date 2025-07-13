@@ -36,18 +36,28 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 PRED_DIR.mkdir(parents=True, exist_ok=True)
 CATEGORIZED_DIR.mkdir(parents=True, exist_ok=True)
 
-# 注册中文字体，优先使用系统中的 Noto Sans CJK
+# 注册中文字体，依次尝试系统中的常见字体
 try:
-    font_path = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
-    if os.path.exists(font_path):
+    candidate_paths = [
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+        "C:/Windows/Fonts/simhei.ttf",
+    ]
+    font_path = None
+    for p in candidate_paths:
+        if os.path.exists(p):
+            font_path = p
+            break
+    if font_path:
         pdfmetrics.registerFont(TTFont("SimHei", font_path))
         font_manager.fontManager.addfont(font_path)
-    else:
-        win_font = "C:/Windows/Fonts/simhei.ttf"
-        pdfmetrics.registerFont(TTFont("SimHei", win_font))
-        font_manager.fontManager.addfont(win_font)
-    plt.rcParams["font.sans-serif"] = ["SimHei", "Noto Sans CJK SC", "DejaVu Sans"]
-    plt.rcParams["axes.unicode_minus"] = False
+        plt.rcParams["font.sans-serif"] = [
+            "SimHei",
+            "Noto Sans CJK SC",
+            "WenQuanYi Zen Hei",
+            "DejaVu Sans",
+        ]
+        plt.rcParams["axes.unicode_minus"] = False
 except Exception:
     pass
 

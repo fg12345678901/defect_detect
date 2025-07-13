@@ -6,7 +6,7 @@
 <style>
     @font-face {
       font-family: 'SimHei';
-      src: url('file:///usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc') format('truetype');
+      src: url('file:///usr/share/fonts/truetype/wqy/wqy-zenhei.ttc') format('truetype');
     }
     body {
       font-family: 'SimHei', 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif;
@@ -307,13 +307,6 @@
     </div>
 
     {% for t, counts in class_counts_all.items() %}
-    {% set has_defects = false %}
-    {% for cname, cnt in counts.items() %}
-      {% if cnt > 0 %}
-        {% set has_defects = true %}
-      {% endif %}
-    {% endfor %}
-    {% if has_defects %}
     <div class="section">
       <h3>{{ task_info.tasks[t].task_name_cn }}缺陷类型统计</h3>
       <table>
@@ -342,7 +335,6 @@
       </div>
       {% endif %}
     </div>
-    {% endif %}
     {% endfor %}
 
     {% else %}
