@@ -74,10 +74,22 @@ def render_pdf_from_html(html_content, pdf_path):
     ]
     wkhtml = next((p for p in candidates if p and os.path.exists(p)), None)
     config = pdfkit.configuration(wkhtmltopdf=wkhtml) if wkhtml else None
-    options = {
-        "encoding": "UTF-8",
-        "enable-local-file-access": None,
-    }
+
+    # Embed a Chinese font if available to ensure proper rendering
+    font_candidates = [
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "C:/Windows/Fonts/simhei.ttf",
+    ]
+    font_path = next((p for p in font_candidates if os.path.exists(p)), None)
+    if font_path:
+        with open(font_path, "rb") as f:
+            b64_font = base64.b64encode(f.read()).decode()
+        font_style = (
+            "<style>@font-face{font-family:'SimHeiEmbed';src:url(data:font/ttf;base64,"
+            + b64_font + ") format('truetype');}</style>"
+        )
+        html_content = font_style + html_content
+    options = {"encoding": "UTF-8", "enable-local-file-access": None}
     pdfkit.from_string(html_content, str(pdf_path), configuration=config, options=options)
 
 

@@ -123,6 +123,51 @@ function toggleFolderView(folderId) {
   }
 }
 
+// 创建带动画的环形图
+function createDonutChart(canvasId, labels, values, colors) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || typeof Chart === 'undefined') return null;
+  return new Chart(canvas.getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderColor: colors.map(c => c.replace('0.7', '1')),
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+        duration: 800
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 10, font: { size: 14 } }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = ((value / total) * 100).toFixed(1);
+              return `${label}: ${value} 张 (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
 // 平滑滚动
 function smoothScroll(target) {
   const element = document.querySelector(target);
