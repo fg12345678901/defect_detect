@@ -114,9 +114,11 @@ function toggleFolderView(folderId) {
     if (folderContent.style.display === 'none') {
       folderContent.style.display = 'block';
       icon.style.transform = 'rotate(180deg)';
+      folderHeader?.classList.add('open');
     } else {
       folderContent.style.display = 'none';
       icon.style.transform = 'rotate(0)';
+      folderHeader?.classList.remove('open');
     }
   }
 }

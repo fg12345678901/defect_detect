@@ -336,7 +336,8 @@
       transition: transform 0.3s;
     }
 
-    .folder-header.open i.fa-chevron-down {
+    .folder-header.open i.fa-chevron-down,
+    .folder-subheader.open i.fa-chevron-down {
       transform: rotate(180deg);
     }
 
@@ -412,6 +413,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          cutout: '60%',
           animation: { duration: 800 },
           plugins: {
             legend: {
@@ -508,6 +510,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          cutout: '60%',
           animation: { duration: 800 },
         plugins: {
           legend: {
