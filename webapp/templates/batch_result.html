@@ -1,0 +1,2230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批量检测结果 - 工业表面缺陷检测系统</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- 添加 Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <i class="fas fa-microscope mr-2"></i>工业表面缺陷智能检测系统
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">首页</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">检测结果</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 背景装饰 -->
+  <div class="result-page-bg">
+    <div class="bg-gradient-overlay"></div>
+    <div class="bg-grid-pattern"></div>
+    <div class="floating-elements">
+      <div class="float-element element-1"></div>
+      <div class="float-element element-2"></div>
+      <div class="float-element element-3"></div>
+      <div class="float-element element-4"></div>
+    </div>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="container py-5">
+    <!-- 页面头部 -->
+    <div class="text-center mb-5">
+      <div class="result-header-icon fade-in">
+        <div class="icon-container">
+          <div class="icon-main">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <div class="icon-decoration">
+            <div class="deco-ring ring-1"></div>
+            <div class="deco-ring ring-2"></div>
+            <div class="deco-ring ring-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="section-title-enhanced fade-in" style="animation-delay: 0.1s;">
+        {{ task_info.task_name_cn }}批量检测结果
+      </h1>
+      <p class="section-subtitle-enhanced fade-in" style="animation-delay: 0.2s;">
+        检测完成，以下是详细的分析报告
+      </p>
+    </div>
+
+    <!-- 统计总览 - 增强版 -->
+    <div class="stats-overview-enhanced mb-5">
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="stat-card-3d fade-in" style="animation-delay: 0.1s;">
+            <div class="stat-card-inner">
+              <div class="stat-icon-3d">
+                <i class="fas fa-images"></i>
+                <div class="icon-float"></div>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value-enhanced" data-count="{{ stats.total_images }}">0</div>
+                <div class="stat-label-enhanced">总检测图片</div>
+              </div>
+              <div class="stat-progress">
+                <div class="progress-bar-mini" style="width: 100%;"></div>
+              </div>
+            </div>
+            <div class="card-glow blue"></div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="stat-card-3d fade-in" style="animation-delay: 0.2s;">
+            <div class="stat-card-inner">
+              <div class="stat-icon-3d">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="icon-float"></div>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value-enhanced" data-count="{{ stats.defect_images }}">0</div>
+                <div class="stat-label-enhanced">缺陷图片数</div>
+              </div>
+              <div class="stat-progress">
+                {% set defect_rate = (stats.defect_images / stats.total_images * 100) if stats.total_images > 0 else 0 %}
+                <div class="progress-bar-mini danger" style="width: {{ defect_rate }}%;"></div>
+              </div>
+            </div>
+            <div class="card-glow red"></div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="stat-card-3d fade-in" style="animation-delay: 0.3s;">
+            <div class="stat-card-inner">
+              <div class="stat-icon-3d">
+                <i class="fas fa-percentage"></i>
+                <div class="icon-float"></div>
+              </div>
+              <div class="stat-content">
+                {% set defect_rate = (stats.defect_images / stats.total_images * 100) if stats.total_images > 0 else 0 %}
+                <div class="stat-value-enhanced">
+                  <span data-count="{{ defect_rate|int }}">0</span>.<span>{{ '%0.0f'|format((defect_rate % 1) * 10) }}</span>%
+                </div>
+                <div class="stat-label-enhanced">缺陷率</div>
+              </div>
+              <div class="stat-progress">
+                <div class="progress-bar-mini warning" style="width: {{ defect_rate }}%;"></div>
+              </div>
+            </div>
+            <div class="card-glow yellow"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 缺陷分布图表 - 增强版 -->
+    <div class="row mb-5">
+      <div class="col-lg-8">
+        <div class="chart-card-enhanced fade-in" style="animation-delay: 0.4s;">
+          <div class="chart-header">
+            <div class="header-left">
+              <div class="header-icon">
+                <i class="fas fa-chart-pie"></i>
+              </div>
+              <h3>缺陷类型分布</h3>
+            </div>
+            <div class="header-right">
+              <button class="chart-btn active" data-chart="doughnut">
+                <i class="fas fa-chart-pie"></i>
+              </button>
+              <button class="chart-btn" data-chart="bar">
+                <i class="fas fa-chart-bar"></i>
+              </button>
+            </div>
+          </div>
+          <div class="chart-body">
+            {% if stats.defect_images > 0 %}
+            <div class="chart-container">
+              <canvas id="defectChart"></canvas>
+              <div class="chart-center-label" id="chartCenterLabel">
+                <div class="center-value">{{ stats.defect_images }}</div>
+                <div class="center-text">缺陷总数</div>
+              </div>
+            </div>
+            {% else %}
+            <div class="no-defect-celebration">
+              <div class="celebration-icon">
+                <i class="fas fa-trophy"></i>
+                <div class="confetti">
+                  <div class="confetti-piece"></div>
+                  <div class="confetti-piece"></div>
+                  <div class="confetti-piece"></div>
+                  <div class="confetti-piece"></div>
+                  <div class="confetti-piece"></div>
+                </div>
+              </div>
+              <h4>完美品质！</h4>
+              <p>所有图片均未检测到缺陷</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="quality-score-card fade-in" style="animation-delay: 0.5s;">
+          <div class="score-header">
+            <i class="fas fa-award"></i>
+            <h4>质量评分</h4>
+          </div>
+          <div class="score-body">
+            <div class="circular-score">
+              <svg viewBox="0 0 200 200">
+                <circle class="score-bg" cx="100" cy="100" r="85"></circle>
+                {% set quality_score = ((stats.total_images - stats.defect_images) / stats.total_images * 100) if stats.total_images > 0 else 100 %}
+                <circle class="score-fill" cx="100" cy="100" r="85"
+                        style="stroke-dasharray: {{ quality_score * 5.34 }}, 534;"></circle>
+              </svg>
+              <div class="score-content">
+                <div class="score-value">{{ '%0.1f'|format(quality_score) }}</div>
+                <div class="score-label">质量分</div>
+              </div>
+            </div>
+            <div class="score-grade">
+              {% if quality_score >= 95 %}
+                <span class="grade grade-a">A+</span>
+                <span class="grade-text">优秀</span>
+              {% elif quality_score >= 85 %}
+                <span class="grade grade-b">B+</span>
+                <span class="grade-text">良好</span>
+              {% elif quality_score >= 75 %}
+                <span class="grade grade-c">C+</span>
+                <span class="grade-text">合格</span>
+              {% else %}
+                <span class="grade grade-d">D</span>
+                <span class="grade-text">需改进</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 缺陷统计表格 - 增强版 -->
+    {% if class_counts_mapped %}
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <div class="table-card-enhanced fade-in" style="animation-delay: 0.6s;">
+          <div class="table-header">
+            <div class="header-left">
+              <i class="fas fa-list-ul"></i>
+              <h3>缺陷类型详细统计</h3>
+            </div>
+            <div class="header-actions">
+              <button class="action-btn" onclick="exportTable()">
+                <i class="fas fa-download"></i>
+                导出数据
+              </button>
+            </div>
+          </div>
+          <div class="table-body">
+            <table class="table-enhanced">
+              <thead>
+                <tr>
+                  <th>排名</th>
+                  <th>缺陷类型</th>
+                  <th>检测数量</th>
+                  <th>占比</th>
+                  <th>趋势分析</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set total_defects = stats.defect_images %}
+                {% set sorted_classes = class_counts_mapped.items()|sort(attribute=1, reverse=true) %}
+                {% for classname, count in sorted_classes %}
+                {% if count > 0 %}
+                <tr class="table-row-enhanced">
+                  <td>
+                    <div class="rank-badge rank-{{ loop.index }}">
+                      #{{ loop.index }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="defect-info">
+                      <span class="defect-badge-enhanced defect-{{ task }}-{{ loop.index }}">
+                        {{ classname }}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="count-display">
+                      <span class="count-value">{{ count }}</span>
+                      <span class="count-unit">张</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="percentage-display">
+                      <div class="percentage-value">
+                        {{ '%0.1f'|format(count / total_defects * 100) if total_defects > 0 else 0 }}%
+                      </div>
+                      <div class="percentage-bar">
+                        <div class="bar-fill" style="width: {{ (count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="trend-indicator">
+                      <i class="fas fa-chart-line"></i>
+                      <span class="trend-text">监控中</span>
+                    </div>
+                  </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 分类存储信息 - 增强版 -->
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <div class="storage-card-enhanced fade-in" style="animation-delay: 0.7s;">
+          <div class="storage-header">
+            <div class="header-icon-3d">
+              <i class="fas fa-folder-open"></i>
+              <div class="icon-particles">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="header-text">
+              <h3>自动分类存储</h3>
+              <p>系统已自动将检测结果按缺陷类型分类存储，便于您后续查看和管理</p>
+            </div>
+          </div>
+
+          <div class="storage-body">
+            <div class="folder-grid">
+              <!-- 无缺陷文件夹 -->
+              {% set no_defect_count = stats.total_images - stats.defect_images %}
+              {% if no_defect_count > 0 %}
+              <div class="folder-item-enhanced" onclick="toggleFolderDetails(this)">
+                <div class="folder-visual">
+                  <div class="folder-3d">
+                    <div class="folder-back"></div>
+                    <div class="folder-front">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                  </div>
+                  <div class="folder-glow success"></div>
+                </div>
+                <div class="folder-info">
+                  <h5>无缺陷</h5>
+                  <div class="folder-stats">
+                    <span class="file-count">{{ no_defect_count }} 个文件</span>
+                    <span class="folder-size">合格产品</span>
+                  </div>
+                </div>
+                <div class="folder-details">
+                  <p class="detail-text">包含所有检测合格的产品图片</p>
+                  <div class="storage-path">
+                    <i class="fas fa-folder-open"></i>
+                    <code>static/categorized/无缺陷/</code>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- 各缺陷类型文件夹 -->
+              {% for classname, count in class_counts_mapped.items() %}
+              {% if count > 0 %}
+              <div class="folder-item-enhanced" onclick="toggleFolderDetails(this)">
+                <div class="folder-visual">
+                  <div class="folder-3d">
+                    <div class="folder-back"></div>
+                    <div class="folder-front">
+                      <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                  </div>
+                  <div class="folder-glow defect"></div>
+                </div>
+                <div class="folder-info">
+                  <h5 class="defect-badge-enhanced defect-{{ task }}-{{ loop.index }}">{{ classname }}</h5>
+                  <div class="folder-stats">
+                    <span class="file-count">{{ count }} 个文件</span>
+                    <span class="folder-size">需要关注</span>
+                  </div>
+                </div>
+                <div class="folder-details">
+                  <p class="detail-text">包含所有检测到{{ classname }}的图片</p>
+                  <div class="storage-path">
+                    <i class="fas fa-folder-open"></i>
+                    <code>static/categorized/{{ classname }}/</code>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图片详情 - 增强版 -->
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <div class="gallery-card-enhanced fade-in" style="animation-delay: 0.8s;">
+          <div class="gallery-header">
+            <h3><i class="fas fa-images mr-2"></i>检测结果详情</h3>
+            <div class="view-controls">
+              <button class="view-btn active" data-view="grid">
+                <i class="fas fa-th"></i>
+              </button>
+              <button class="view-btn" data-view="list">
+                <i class="fas fa-list"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="gallery-body">
+            <div class="accordion-enhanced" id="defectAccordion">
+              {% for classname, count in class_counts_mapped.items() %}
+              {% if count > 0 %}
+              <div class="accordion-item-enhanced">
+                <div class="accordion-header" data-toggle="collapse" data-target="#collapse{{ loop.index }}">
+                  <div class="header-content">
+                    <div class="defect-indicator defect-{{ task }}-{{ loop.index }}">
+                      <i class="fas fa-tag"></i>
+                    </div>
+                    <div class="header-info">
+                      <h5 class="defect-title">{{ classname }}</h5>
+                      <span class="image-count">{{ count }} 张图片</span>
+                    </div>
+                  </div>
+                  <div class="header-arrow">
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+
+                <div id="collapse{{ loop.index }}" class="collapse" data-parent="#defectAccordion">
+                  <div class="accordion-body">
+                    <div class="image-grid-enhanced">
+                      {% set cls_key = 'class_' ~ loop.index %}
+                      {% set imgs = class_img_map_mapped.get(cls_key, []) %}
+                      {% if imgs|length > 0 %}
+                        {% for filename in imgs[:12] %}
+                        <div class="image-item-enhanced">
+                          <div class="image-container">
+                            <img src="{{ url_for('static', filename='pred_vis/' ~ filename) }}"
+                                 alt="{{ filename }}"
+                                 loading="lazy">
+                            <div class="image-overlay">
+                              <div class="overlay-content">
+                                <button class="overlay-btn" onclick="viewImage('{{ url_for('static', filename='pred_vis/' ~ filename) }}')">
+                                  <i class="fas fa-search-plus"></i>
+                                </button>
+                                <span class="image-name">{{ filename }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
+
+                        {% if imgs|length > 12 %}
+                        <div class="more-images-indicator">
+                          <div class="indicator-content">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>还有 {{ imgs|length - 12 }} 张</span>
+                          </div>
+                        </div>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮 - 增强版 -->
+    <div class="action-section fade-in" style="animation-delay: 0.9s;">
+      <div class="action-container">
+        <a href="{{ url_for('download_report') }}" class="action-btn-3d primary">
+          <div class="btn-content">
+            <i class="fas fa-file-pdf"></i>
+            <span>下载检测报告</span>
+          </div>
+          <div class="btn-shadow"></div>
+        </a>
+
+        <a href="{{ url_for('task_page', task=task) }}" class="action-btn-3d secondary">
+          <div class="btn-content">
+            <i class="fas fa-redo"></i>
+            <span>继续检测</span>
+          </div>
+          <div class="btn-shadow"></div>
+        </a>
+
+        <a href="{{ url_for('index') }}" class="action-btn-3d tertiary">
+          <div class="btn-content">
+            <i class="fas fa-home"></i>
+            <span>返回首页</span>
+          </div>
+          <div class="btn-shadow"></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图片查看器模态框 -->
+  <div class="image-viewer-modal" id="imageViewer">
+    <div class="viewer-content">
+      <button class="viewer-close" onclick="closeViewer()">
+        <i class="fas fa-times"></i>
+      </button>
+      <img src="" alt="查看图片" id="viewerImage">
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="footer-gradient text-white py-4 mt-5">
+    <div class="container text-center">
+      <p class="mb-0">工业表面缺陷智能检测系统 &copy; {{ current_year }}</p>
+      <small>Powered by Deep Learning Technology</small>
+    </div>
+  </footer>
+
+  <!-- 样式 -->
+  <style>
+    /* 背景装饰 */
+    .result-page-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-gradient-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #edf2f7 100%);
+    }
+
+    .bg-grid-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        linear-gradient(rgba(102, 126, 234, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(102, 126, 234, 0.05) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: grid-move 20s linear infinite;
+    }
+
+    @keyframes grid-move {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .floating-elements {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .float-element {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      filter: blur(40px);
+    }
+
+    .element-1 {
+      width: 300px;
+      height: 300px;
+      top: -150px;
+      left: -150px;
+      animation: float-1 25s ease-in-out infinite;
+    }
+
+    .element-2 {
+      width: 200px;
+      height: 200px;
+      top: 50%;
+      right: -100px;
+      animation: float-2 20s ease-in-out infinite;
+    }
+
+    .element-3 {
+      width: 250px;
+      height: 250px;
+      bottom: -125px;
+      left: 30%;
+      animation: float-3 30s ease-in-out infinite;
+    }
+
+    .element-4 {
+      width: 150px;
+      height: 150px;
+      top: 30%;
+      left: 10%;
+      animation: float-4 15s ease-in-out infinite;
+    }
+
+    @keyframes float-1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(100px, 50px) scale(1.1); }
+    }
+
+    @keyframes float-2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-50px, -100px) scale(0.9); }
+    }
+
+    @keyframes float-3 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(50px, -50px) scale(1.2); }
+    }
+
+    @keyframes float-4 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(100px, 100px) scale(0.8); }
+    }
+
+    /* 页面头部图标 */
+    .result-header-icon {
+      margin-bottom: 2rem;
+    }
+
+    .icon-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto;
+    }
+
+    .icon-main {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: white;
+      box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+      z-index: 2;
+    }
+
+    .icon-decoration {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .deco-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 2px solid rgba(102, 126, 234, 0.2);
+      border-radius: 50%;
+    }
+
+    .ring-1 {
+      width: 100px;
+      height: 100px;
+      animation: ring-pulse 3s ease-out infinite;
+    }
+
+    .ring-2 {
+      width: 120px;
+      height: 120px;
+      animation: ring-pulse 3s ease-out infinite 1s;
+    }
+
+    .ring-3 {
+      width: 140px;
+      height: 140px;
+      animation: ring-pulse 3s ease-out infinite 2s;
+    }
+
+    @keyframes ring-pulse {
+      0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    /* 标题样式 */
+    .section-title-enhanced {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle-enhanced {
+      font-size: 1.1rem;
+      color: #718096;
+    }
+
+    /* 统计卡片 - 3D效果 */
+    .stat-card-3d {
+      position: relative;
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card-3d:hover {
+      transform: translateY(-10px);
+    }
+
+    .stat-card-inner {
+      background: white;
+      border-radius: 25px;
+      padding: 2rem;
+      height: 100%;
+      position: relative;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stat-icon-3d {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+
+    .icon-float {
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      background: inherit;
+      border-radius: inherit;
+      filter: blur(15px);
+      opacity: 0.5;
+      z-index: -1;
+    }
+
+    .stat-value-enhanced {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2d3748;
+      line-height: 1;
+    }
+
+    .stat-label-enhanced {
+      font-size: 1rem;
+      color: #718096;
+      margin-top: 0.5rem;
+    }
+
+    .stat-progress {
+      margin-top: 1.5rem;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar-mini {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+
+    .progress-bar-mini.danger {
+      background: linear-gradient(90deg, #fc8181 0%, #f56565 100%);
+    }
+
+    .progress-bar-mini.warning {
+      background: linear-gradient(90deg, #f6ad55 0%, #ed8936 100%);
+    }
+
+    .card-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200%;
+      height: 200%;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .stat-card-3d:hover .card-glow {
+      opacity: 0.3;
+    }
+
+    .card-glow.blue {
+      background: #667eea;
+    }
+
+    .card-glow.red {
+      background: #fc8181;
+    }
+
+    .card-glow.yellow {
+      background: #f6ad55;
+    }
+
+    /* 图表卡片 */
+    .chart-card-enhanced {
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      height: 100%;
+    }
+
+    .chart-header {
+      background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-icon {
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .chart-header h3 {
+      margin: 0;
+      color: #2d3748;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .chart-btn {
+      background: white;
+      border: 2px solid #e2e8f0;
+      padding: 0.5rem 0.75rem;
+      border-radius: 10px;
+      color: #718096;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .chart-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .chart-btn.active {
+      background: #667eea;
+      border-color: #667eea;
+      color: white;
+    }
+
+    .chart-body {
+      padding: 2rem;
+      position: relative;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 350px;
+    }
+
+    .chart-center-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .center-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .center-text {
+      font-size: 0.9rem;
+      color: #718096;
+    }
+
+    /* 无缺陷庆祝动画 */
+    .no-defect-celebration {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .celebration-icon {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 2rem;
+    }
+
+    .celebration-icon i {
+      font-size: 5rem;
+      color: #f6ad55;
+      animation: trophy-bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes trophy-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .confetti {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #667eea;
+      animation: confetti-fall 3s ease-in-out infinite;
+    }
+
+    .confetti-piece:nth-child(1) {
+      left: -50px;
+      background: #fc8181;
+      animation-delay: 0s;
+    }
+
+    .confetti-piece:nth-child(2) {
+      left: -25px;
+      background: #f6ad55;
+      animation-delay: 0.5s;
+    }
+
+    .confetti-piece:nth-child(3) {
+      left: 0;
+      background: #48bb78;
+      animation-delay: 1s;
+    }
+
+    .confetti-piece:nth-child(4) {
+      left: 25px;
+      background: #667eea;
+      animation-delay: 1.5s;
+    }
+
+    .confetti-piece:nth-child(5) {
+      left: 50px;
+      background: #ed64a6;
+      animation-delay: 2s;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(0) rotateZ(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100px) rotateZ(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* 质量评分卡片 */
+    .quality-score-card {
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      height: 100%;
+    }
+
+    .score-header {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: white;
+    }
+
+    .score-header i {
+      font-size: 1.5rem;
+    }
+
+    .score-header h4 {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .score-body {
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .circular-score {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 2rem;
+    }
+
+    .circular-score svg {
+      transform: rotate(-90deg);
+    }
+
+    .score-bg {
+      fill: none;
+      stroke: #e2e8f0;
+      stroke-width: 12;
+    }
+
+    .score-fill {
+      fill: none;
+      stroke: url(#scoreGradient);
+      stroke-width: 12;
+      stroke-linecap: round;
+      transition: stroke-dasharray 1s ease;
+      animation: score-fill-anim 1s ease-out;
+    }
+
+    @keyframes score-fill-anim {
+      from { stroke-dasharray: 0, 534; }
+    }
+
+    .score-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .score-value {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .score-label {
+      font-size: 1rem;
+      color: #718096;
+    }
+
+    .score-grade {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .grade {
+      font-size: 2rem;
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      border-radius: 15px;
+    }
+
+    .grade-a {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+    }
+
+    .grade-b {
+      background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+      color: white;
+    }
+
+    .grade-c {
+      background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+      color: white;
+    }
+
+    .grade-d {
+      background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+      color: white;
+    }
+
+    .grade-text {
+      font-size: 1.2rem;
+      color: #4a5568;
+      font-weight: 600;
+    }
+
+    /* 表格卡片 */
+    .table-card-enhanced {
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-header {
+      background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table-header .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .table-header i {
+      font-size: 1.5rem;
+      color: #667eea;
+    }
+
+    .table-header h3 {
+      margin: 0;
+      color: #2d3748;
+      font-weight: 600;
+    }
+
+    .action-btn {
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .action-btn:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .table-body {
+      padding: 0;
+    }
+
+    .table-enhanced {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-enhanced thead th {
+      background: #f8fafc;
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .table-row-enhanced {
+      transition: all 0.3s ease;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .table-row-enhanced:hover {
+      background: #f8fafc;
+      transform: translateX(5px);
+    }
+
+    .table-enhanced td {
+      padding: 1.25rem 1.5rem;
+      vertical-align: middle;
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 35px;
+      height: 35px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .rank-1 {
+      background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+      color: white;
+    }
+
+    .rank-2 {
+      background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+      color: white;
+    }
+
+    .rank-3 {
+      background: linear-gradient(135deg, #feb2b2 0%, #fc8181 100%);
+      color: white;
+    }
+
+    .defect-badge-enhanced {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 600;
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .count-display {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+
+    .count-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .count-unit {
+      font-size: 0.9rem;
+      color: #718096;
+    }
+
+    .percentage-display {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .percentage-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #4a5568;
+    }
+
+    .percentage-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+
+    .trend-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #718096;
+    }
+
+    .trend-text {
+      font-size: 0.9rem;
+    }
+
+    /* 存储卡片 */
+    .storage-card-enhanced {
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .storage-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      color: white;
+    }
+
+    .header-icon-3d {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    .icon-particles {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .icon-particles span {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      animation: particle-float 3s ease-in-out infinite;
+    }
+
+    .icon-particles span:nth-child(1) {
+      top: -30px;
+      left: -30px;
+      animation-delay: 0s;
+    }
+
+    .icon-particles span:nth-child(2) {
+      top: -30px;
+      right: -30px;
+      animation-delay: 1s;
+    }
+
+    .icon-particles span:nth-child(3) {
+      bottom: -30px;
+      left: -30px;
+      animation-delay: 2s;
+    }
+
+    @keyframes particle-float {
+      0%, 100% { transform: scale(1) translate(0, 0); opacity: 0; }
+      50% { transform: scale(1.5) translate(10px, -10px); opacity: 1; }
+    }
+
+    .header-text h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .header-text p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .storage-body {
+      padding: 2rem;
+    }
+
+    .folder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .folder-item-enhanced {
+      position: relative;
+      background: #f8fafc;
+      border-radius: 20px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .folder-item-enhanced:hover {
+      background: white;
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .folder-visual {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .folder-3d {
+      position: relative;
+      width: 60px;
+      height: 50px;
+      margin: 0 auto;
+      transform-style: preserve-3d;
+      transition: transform 0.3s ease;
+    }
+
+    .folder-item-enhanced:hover .folder-3d {
+      transform: rotateY(10deg) rotateX(-5deg);
+    }
+
+    .folder-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+      border-radius: 5px 5px 0 0;
+      transform: translateZ(-10px);
+    }
+
+    .folder-front {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f6e05e 0%, #f6ad55 100%);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .folder-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      filter: blur(30px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .folder-glow.success {
+      background: #48bb78;
+    }
+
+    .folder-glow.defect {
+      background: #fc8181;
+    }
+
+    .folder-item-enhanced:hover .folder-glow {
+      opacity: 0.5;
+    }
+
+    .folder-info h5 {
+      margin: 0 0 0.5rem 0;
+      color: #2d3748;
+      font-weight: 600;
+    }
+
+    .folder-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #718096;
+    }
+
+    .folder-details {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e2e8f0;
+      display: none;
+    }
+
+    .folder-item-enhanced.expanded .folder-details {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .detail-text {
+      font-size: 0.9rem;
+      color: #718096;
+      margin-bottom: 0.5rem;
+    }
+
+    .storage-path {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #4a5568;
+    }
+
+    .storage-path code {
+      background: #e2e8f0;
+      padding: 0.25rem 0.5rem;
+      border-radius: 5px;
+      font-size: 0.8rem;
+    }
+
+    /* 图片画廊 */
+    .gallery-card-enhanced {
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .gallery-header {
+      background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .gallery-header h3 {
+      margin: 0;
+      color: #2d3748;
+      font-weight: 600;
+    }
+
+    .view-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .view-btn {
+      background: white;
+      border: 2px solid #e2e8f0;
+      padding: 0.5rem 0.75rem;
+      border-radius: 10px;
+      color: #718096;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .view-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .view-btn.active {
+      background: #667eea;
+      border-color: #667eea;
+      color: white;
+    }
+
+    .gallery-body {
+      padding: 0;
+    }
+
+    .accordion-enhanced {
+      border: none;
+    }
+
+    .accordion-item-enhanced {
+      border: none;
+      border-bottom: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .accordion-item-enhanced:last-child {
+      border-bottom: none;
+    }
+
+    .accordion-header {
+      padding: 1.5rem 2rem;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .accordion-header:hover {
+      background: #f8fafc;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .defect-indicator {
+      width: 50px;
+      height: 50px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .header-info h5 {
+      margin: 0 0 0.25rem 0;
+      color: #2d3748;
+      font-weight: 600;
+    }
+
+    .image-count {
+      font-size: 0.9rem;
+      color: #718096;
+    }
+
+    .header-arrow {
+      color: #718096;
+      transition: transform 0.3s ease;
+    }
+
+    .accordion-header[aria-expanded="true"] .header-arrow {
+      transform: rotate(180deg);
+    }
+
+    .accordion-body {
+      padding: 2rem;
+      background: #f8fafc;
+    }
+
+    .image-grid-enhanced {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .image-item-enhanced {
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .image-item-enhanced:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .image-container {
+      position: relative;
+      padding-bottom: 100%;
+      overflow: hidden;
+    }
+
+    .image-container img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .image-item-enhanced:hover img {
+      transform: scale(1.1);
+    }
+
+    .image-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem;
+    }
+
+    .image-item-enhanced:hover .image-overlay {
+      opacity: 1;
+    }
+
+    .overlay-content {
+      width: 100%;
+      color: white;
+    }
+
+    .overlay-btn {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 0.5rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 0.5rem;
+    }
+
+    .overlay-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .image-name {
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .more-images-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+      border-radius: 15px;
+      min-height: 180px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .more-images-indicator:hover {
+      background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+      transform: scale(1.05);
+    }
+
+    .indicator-content {
+      text-align: center;
+      color: #4a5568;
+    }
+
+    .indicator-content i {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    /* 操作按钮 */
+    .action-section {
+      margin-top: 3rem;
+      padding: 2rem 0;
+    }
+
+    .action-container {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .action-btn-3d {
+      position: relative;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn-3d:hover {
+      transform: translateY(-5px);
+      text-decoration: none;
+    }
+
+    .btn-content {
+      position: relative;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .action-btn-3d.secondary .btn-content {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    }
+
+    .action-btn-3d.tertiary .btn-content {
+      background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    }
+
+    .btn-shadow {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: -10px;
+      bottom: -10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 50px;
+      filter: blur(15px);
+      z-index: -1;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn-3d:hover .btn-shadow {
+      top: 15px;
+      filter: blur(20px);
+    }
+
+    /* 图片查看器 */
+    .image-viewer-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .viewer-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .viewer-close {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .viewer-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
+    }
+
+    #viewerImage {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 缺陷徽章颜色 */
+    .defect-steel-1 { background: rgba(255, 99, 132, 0.8); color: white; }
+    .defect-steel-2 { background: rgba(75, 192, 192, 0.8); color: white; }
+    .defect-steel-3 { background: rgba(54, 162, 235, 0.8); color: white; }
+    .defect-steel-4 { background: rgba(255, 206, 86, 0.8); color: white; }
+
+    .defect-phone-1 { background: rgba(153, 102, 255, 0.8); color: white; }
+    .defect-phone-2 { background: rgba(255, 159, 64, 0.8); color: white; }
+    .defect-phone-3 { background: rgba(75, 192, 192, 0.8); color: white; }
+
+    .defect-magnetic-1 { background: rgba(255, 99, 132, 0.8); color: white; }
+    .defect-magnetic-2 { background: rgba(75, 192, 192, 0.8); color: white; }
+    .defect-magnetic-3 { background: rgba(54, 162, 235, 0.8); color: white; }
+    .defect-magnetic-4 { background: rgba(255, 206, 86, 0.8); color: white; }
+    .defect-magnetic-5 { background: rgba(153, 102, 255, 0.8); color: white; }
+
+    /* 动画 */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .folder-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .image-grid-enhanced {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+
+      .action-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .action-btn-3d {
+        width: 100%;
+      }
+
+      .btn-content {
+        justify-content: center;
+      }
+    }
+
+    /* 打印样式 */
+    @media print {
+      .navbar,
+      footer,
+      .view-controls,
+      .action-section,
+      .bg-grid-pattern,
+      .floating-elements {
+        display: none !important;
+      }
+
+      .container {
+        max-width: 100% !important;
+      }
+
+      * {
+        box-shadow: none !important;
+      }
+    }
+  </style>
+
+  <!-- SVG渐变定义 -->
+  <svg width="0" height="0">
+    <defs>
+      <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#48bb78;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#38a169;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- 脚本 -->
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+    // 启用工具提示
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    });
+
+    // 数字增长动画
+    function animateValue(element, start, end, duration) {
+      const range = end - start;
+      const increment = end > start ? 1 : -1;
+      const stepTime = Math.abs(Math.floor(duration / range));
+      let current = start;
+
+      const timer = setInterval(function() {
+        current += increment;
+        element.textContent = current;
+        if (current == end) {
+          clearInterval(timer);
+        }
+      }, stepTime);
+    }
+
+    // 当元素进入视口时触发动画
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const element = entry.target;
+          const endValue = parseInt(element.getAttribute('data-count'));
+          if (endValue) {
+            animateValue(element, 0, endValue, 1000);
+            observer.unobserve(element);
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    // 观察所有需要动画的数字
+    document.querySelectorAll('[data-count]').forEach(element => {
+      observer.observe(element);
+    });
+
+    // 准备图表数据
+    const classCounts = {{ class_counts_mapped | tojson }};
+    const task = "{{ task }}";
+
+    // 颜色映射 - 与后端保持一致
+    const colorMaps = {
+      'steel': {
+        1: 'rgba(255, 99, 132, 0.8)',
+        2: 'rgba(75, 192, 192, 0.8)',
+        3: 'rgba(54, 162, 235, 0.8)',
+        4: 'rgba(255, 206, 86, 0.8)'
+      },
+      'phone': {
+        1: 'rgba(153, 102, 255, 0.8)',
+        2: 'rgba(255, 159, 64, 0.8)',
+        3: 'rgba(75, 192, 192, 0.8)'
+      },
+      'magnetic': {
+        1: 'rgba(255, 99, 132, 0.8)',
+        2: 'rgba(75, 192, 192, 0.8)',
+        3: 'rgba(54, 162, 235, 0.8)',
+        4: 'rgba(255, 206, 86, 0.8)',
+        5: 'rgba(153, 102, 255, 0.8)'
+      }
+    };
+
+    // 太阳能板使用渐变色
+    if (task === 'solar-panel') {
+      colorMaps['solar-panel'] = {};
+      let index = 0;
+      for (let i = 1; i <= 29; i++) {
+        const hue = (index * 360 / Object.values(classCounts).filter(v => v > 0).length) % 360;
+        const r = Math.floor(128 + 127 * Math.cos((hue * Math.PI) / 180));
+        const g = Math.floor(128 + 127 * Math.cos(((hue - 120) * Math.PI) / 180));
+        const b = Math.floor(128 + 127 * Math.cos(((hue + 120) * Math.PI) / 180));
+        colorMaps['solar-panel'][i] = `rgba(${r}, ${g}, ${b}, 0.8)`;
+        index++;
+      }
+    }
+
+    // 获取当前任务的类名映射
+    const taskInfo = {{ task_info | tojson }};
+    const classNames = taskInfo.class_names || {};
+
+    // 构建用于图表的数据
+    const chartData = {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: [],
+        borderColor: [],
+        borderWidth: 2
+      }]
+    };
+
+    // 创建名称到ID的映射
+    const nameToId = {};
+    for (const [id, info] of Object.entries(classNames)) {
+      nameToId[info.cn] = parseInt(id);
+    }
+
+    // 处理数据
+    let classIndex = 1;
+    for (const [className, count] of Object.entries(classCounts)) {
+      if (count > 0) {
+        chartData.labels.push(className);
+        chartData.datasets[0].data.push(count);
+
+        // 获取颜色
+        let color;
+        const classId = nameToId[className] || classIndex;
+
+        if (task === 'solar-panel') {
+          // 太阳能板使用HSL渐变色
+          const index = chartData.labels.length - 1;
+          const hue = (index * 360 / Object.values(classCounts).filter(v => v > 0).length) % 360;
+          color = `hsla(${hue}, 70%, 50%, 0.8)`;
+        } else {
+          // 其他任务使用预定义颜色
+          const colorMap = colorMaps[task] || {};
+          color = colorMap[classId] || 'rgba(128, 128, 128, 0.8)';
+        }
+
+        chartData.datasets[0].backgroundColor.push(color);
+        chartData.datasets[0].borderColor.push(color.replace('0.8', '1'));
+        classIndex++;
+      }
+    }
+
+    // 绘制图表
+    let myChart = null;
+    if (chartData.labels.length > 0) {
+      const ctx = document.getElementById('defectChart').getContext('2d');
+      myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                padding: 15,
+                font: {
+                  size: 14
+                },
+                usePointStyle: true
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${label}: ${value} 张 (${percentage}%)`;
+                }
+              }
+            }
+          },
+          animation: {
+            animateRotate: true,
+            animateScale: false
+          }
+        }
+      });
+    }
+
+    // 图表类型切换
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        const chartType = this.getAttribute('data-chart');
+        if (myChart) {
+          myChart.config.type = chartType === 'bar' ? 'bar' : 'doughnut';
+
+          if (chartType === 'bar') {
+            myChart.options.cutout = '0%';
+            myChart.options.plugins.legend.display = false;
+            document.getElementById('chartCenterLabel').style.display = 'none';
+          } else {
+            myChart.options.cutout = '60%';
+            myChart.options.plugins.legend.display = true;
+            document.getElementById('chartCenterLabel').style.display = 'block';
+          }
+
+          myChart.update();
+        }
+      });
+    });
+
+    // 文件夹展开/收起
+    function toggleFolderDetails(element) {
+      element.classList.toggle('expanded');
+    }
+
+    // 图片查看器
+    function viewImage(src) {
+      const viewer = document.getElementById('imageViewer');
+      const img = document.getElementById('viewerImage');
+      img.src = src;
+      viewer.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeViewer() {
+      const viewer = document.getElementById('imageViewer');
+      viewer.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    // 点击背景关闭查看器
+    document.getElementById('imageViewer').addEventListener('click', function(e) {
+      if (e.target === this || e.target.classList.contains('viewer-content')) {
+        closeViewer();
+      }
+    });
+
+    // ESC键关闭查看器
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeViewer();
+      }
+    });
+
+    // 导出表格功能
+    function exportTable() {
+      // 这里可以实现表格导出功能
+      alert('导出功能开发中...');
+    }
+
+    // 视图切换
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        const view = this.getAttribute('data-view');
+        // 这里可以实现不同的视图布局
+        console.log('切换到视图:', view);
+      });
+    });
+  </script>
+</body>
+</html>

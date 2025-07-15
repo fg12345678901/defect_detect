@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工业表面缺陷智能检测系统</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <i class="fas fa-microscope mr-2"></i>工业表面缺陷智能检测系统
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#home">首页</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#features">功能特点</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#performance">系统性能</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#about">系统说明</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 英雄区域 -->
+  <section class="hero-section-enhanced" id="home">
+    <div class="hero-background">
+      <div class="hero-particles"></div>
+      <div class="hero-gradient-overlay"></div>
+    </div>
+
+    <div class="container">
+      <div class="row align-items-center min-vh-80">
+        <div class="col-lg-6">
+          <div class="hero-content">
+            <div class="hero-badge mb-4 fade-in">
+              <i class="fas fa-award mr-2"></i>
+              <span>深度学习驱动的智能检测平台</span>
+            </div>
+
+            <h1 class="display-3 font-weight-bold mb-4 text-white hero-title">
+              工业表面缺陷<br><span class="gradient-text">智能检测系统</span>
+            </h1>
+
+            <p class="lead text-white-80 mb-5 hero-subtitle">
+              采用先进的深度学习技术，支持钢铁、手机屏幕、磁瓦、太阳能板等多种工业产品的表面缺陷自动检测与分类，为工业质检提供高效精准的解决方案
+            </p>
+
+            <div class="hero-stats-enhanced mb-5">
+              <div class="stat-item-enhanced">
+                <div class="stat-icon-wrapper">
+                  <i class="fas fa-layer-group"></i>
+                  <div class="stat-pulse"></div>
+                </div>
+                <div class="stat-content">
+                  <h3 class="stat-number" data-count="4">0</h3>
+                  <p class="stat-label">检测场景</p>
+                </div>
+              </div>
+
+              <div class="stat-item-enhanced">
+                <div class="stat-icon-wrapper">
+                  <i class="fas fa-bullseye"></i>
+                  <div class="stat-pulse"></div>
+                </div>
+                <div class="stat-content">
+                  <h3 class="stat-number" data-count="95">0</h3>
+                  <span class="stat-suffix">%+</span>
+                  <p class="stat-label">检测精度</p>
+                </div>
+              </div>
+
+              <div class="stat-item-enhanced">
+                <div class="stat-icon-wrapper">
+                  <i class="fas fa-tachometer-alt"></i>
+                  <div class="stat-pulse"></div>
+                </div>
+                <div class="stat-content">
+                  <h3 class="stat-text">实时</h3>
+                  <p class="stat-label">检测速度</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-actions">
+              <a href="#features" class="btn btn-hero-primary btn-lg mr-3">
+                <i class="fas fa-rocket mr-2"></i>开始使用
+                <span class="btn-shine"></span>
+              </a>
+              <a href="#about" class="btn btn-hero-secondary btn-lg">
+                <i class="fas fa-info-circle mr-2"></i>了解更多
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="hero-visual">
+            <div class="hero-3d-wrapper">
+              <div class="hero-cube">
+                <div class="cube-face cube-front">
+                  <i class="fas fa-industry"></i>
+                </div>
+                <div class="cube-face cube-back">
+                  <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="cube-face cube-right">
+                  <i class="fas fa-magnet"></i>
+                </div>
+                <div class="cube-face cube-left">
+                  <i class="fas fa-solar-panel"></i>
+                </div>
+                <div class="cube-face cube-top">
+                  <i class="fas fa-microscope"></i>
+                </div>
+                <div class="cube-face cube-bottom">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+              </div>
+
+              <div class="orbit-ring orbit-1">
+                <div class="orbit-dot"></div>
+              </div>
+              <div class="orbit-ring orbit-2">
+                <div class="orbit-dot"></div>
+              </div>
+              <div class="orbit-ring orbit-3">
+                <div class="orbit-dot"></div>
+              </div>
+            </div>
+
+            <div class="floating-badges">
+              <div class="floating-badge badge-1">
+                <i class="fas fa-check-circle"></i>
+                <span>高精度</span>
+              </div>
+              <div class="floating-badge badge-2">
+                <i class="fas fa-bolt"></i>
+                <span>实时检测</span>
+              </div>
+              <div class="floating-badge badge-3">
+                <i class="fas fa-brain"></i>
+                <span>AI驱动</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-wave">
+      <svg viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#ffffff" fill-opacity="1" d="M0,40L48,45C96,50,192,60,288,58.3C384,57,480,43,576,38.3C672,33,768,37,864,41.7C960,47,1056,53,1152,51.7C1248,50,1344,40,1392,35L1440,30L1440,100L1392,100C1344,100,1248,100,1152,100C1056,100,960,100,864,100C768,100,672,100,576,100C480,100,384,100,288,100C192,100,96,100,48,100L0,100Z"></path>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 功能卡片区域 -->
+  <section class="py-5" id="features">
+    <div class="container">
+      <div class="text-center mb-5">
+        <div class="section-badge fade-in">
+          <i class="fas fa-sparkles mr-2"></i>
+          <span>核心功能</span>
+        </div>
+        <h2 class="section-title-enhanced">选择检测模式</h2>
+        <p class="section-subtitle-enhanced">根据您的需求选择合适的检测方式，体验智能化的工业质检</p>
+      </div>
+
+      <div class="row">
+        <!-- 自动分类检测卡片（放在最前面） -->
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="feature-card-premium special-card h-100 fade-in">
+            <div class="card-glow"></div>
+            <div class="card-ribbon-enhanced">
+              <span>推荐</span>
+              <i class="fas fa-star"></i>
+            </div>
+
+            <div class="card-icon-3d">
+              <div class="icon-inner">
+                <i class="fas fa-magic"></i>
+              </div>
+              <div class="icon-shadow"></div>
+            </div>
+
+            <h4 class="card-title">智能分类检测</h4>
+            <p class="card-description">
+              自动识别图片类型并选择对应的检测模型，无需手动选择，一键完成多类型产品检测
+            </p>
+
+            <div class="card-features">
+              <div class="feature-tag">
+                <i class="fas fa-robot"></i>
+                <span>自动识别</span>
+              </div>
+              <div class="feature-tag">
+                <i class="fas fa-lightning"></i>
+                <span>一键检测</span>
+              </div>
+            </div>
+
+            <div class="mt-auto">
+              <a href="{{ url_for('classify_upload') }}" class="btn btn-gradient-success btn-block">
+                <i class="fas fa-bolt mr-2"></i>智能检测
+                <span class="btn-arrow"><i class="fas fa-arrow-right"></i></span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 各任务卡片 -->
+        {% for t in tasks %}
+        {% set task_detail = task_info.tasks.get(t, {}) %}
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="feature-card-premium h-100 fade-in" style="animation-delay: {{ loop.index * 0.1 }}s;">
+            <div class="card-icon-3d">
+              <div class="icon-inner">
+                {% if t == 'steel' %}
+                  <i class="fas fa-industry"></i>
+                {% elif t == 'phone' %}
+                  <i class="fas fa-mobile-alt"></i>
+                {% elif t == 'magnetic' %}
+                  <i class="fas fa-magnet"></i>
+                {% elif t == 'solar-panel' %}
+                  <i class="fas fa-solar-panel"></i>
+                {% else %}
+                  <i class="fas fa-cog"></i>
+                {% endif %}
+              </div>
+              <div class="icon-shadow"></div>
+            </div>
+
+            <h4 class="card-title">{{ task_detail.task_name_cn }}</h4>
+            <p class="card-description">
+              检测{{ task_detail.task_name_cn }}中的
+              {% set class_list = [] %}
+              {% for cls_id, cls_info in task_detail.class_names.items() %}
+                {% if class_list.append(cls_info.cn) %}{% endif %}
+              {% endfor %}
+              {{ class_list[:3]|join('、') }}{% if class_list|length > 3 %}等{% endif %}缺陷
+            </p>
+
+            <div class="card-stats">
+              <div class="stat-mini">
+                <i class="fas fa-layer-group"></i>
+                <span>{{ task_detail.class_names|length }} 种缺陷</span>
+              </div>
+              <div class="stat-mini">
+                <i class="fas fa-check-circle"></i>
+                <span>高精度</span>
+              </div>
+            </div>
+
+            <div class="mt-auto">
+              <a href="{{ url_for('task_page', task=t) }}" class="btn btn-gradient-primary btn-block">
+                <i class="fas fa-arrow-right mr-2"></i>进入检测
+                <span class="btn-arrow"><i class="fas fa-arrow-right"></i></span>
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- 系统性能指标 -->
+  <section class="system-performance-enhanced py-5" id="performance">
+    <div class="container">
+      <div class="text-center mb-5">
+        <div class="section-badge fade-in">
+          <i class="fas fa-chart-line mr-2"></i>
+          <span>性能指标</span>
+        </div>
+        <h2 class="section-title-enhanced">系统性能</h2>
+        <p class="section-subtitle-enhanced">基于深度学习的高精度检测，为工业质检提供可靠保障</p>
+      </div>
+
+      <div class="row">
+        <!-- 语义分割精度展示 -->
+        <div class="col-lg-8 mb-4">
+          <div class="performance-card-enhanced fade-in">
+            <div class="card-header-performance">
+              <div class="header-icon">
+                <i class="fas fa-chart-bar"></i>
+              </div>
+              <div>
+                <h5 class="mb-1">语义分割精度</h5>
+                <p class="text-muted small mb-0">Dice Score - 各产品类型检测精度对比</p>
+              </div>
+            </div>
+
+            <div class="performance-chart-container">
+              <div class="chart-grid">
+                <div class="chart-item" data-score="93">
+                  <div class="chart-bar-wrapper">
+                    <div class="chart-bar" style="--score: 93;">
+                      <div class="bar-fill"></div>
+                      <div class="bar-glow"></div>
+                    </div>
+                    <div class="chart-value">0.93</div>
+                  </div>
+                  <div class="chart-label">
+                    <i class="fas fa-industry"></i>
+                    <span>钢铁表面</span>
+                  </div>
+                </div>
+
+                <div class="chart-item" data-score="92">
+                  <div class="chart-bar-wrapper">
+                    <div class="chart-bar" style="--score: 92;">
+                      <div class="bar-fill"></div>
+                      <div class="bar-glow"></div>
+                    </div>
+                    <div class="chart-value">0.92</div>
+                  </div>
+                  <div class="chart-label">
+                    <i class="fas fa-magnet"></i>
+                    <span>磁瓦</span>
+                  </div>
+                </div>
+
+                <div class="chart-item" data-score="91">
+                  <div class="chart-bar-wrapper">
+                    <div class="chart-bar" style="--score: 91;">
+                      <div class="bar-fill"></div>
+                      <div class="bar-glow"></div>
+                    </div>
+                    <div class="chart-value">0.91</div>
+                  </div>
+                  <div class="chart-label">
+                    <i class="fas fa-solar-panel"></i>
+                    <span>太阳能板</span>
+                  </div>
+                </div>
+
+                <div class="chart-item" data-score="78">
+                  <div class="chart-bar-wrapper">
+                    <div class="chart-bar" style="--score: 78;">
+                      <div class="bar-fill"></div>
+                      <div class="bar-glow"></div>
+                    </div>
+                    <div class="chart-value">0.78</div>
+                  </div>
+                  <div class="chart-label">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>手机屏幕</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <div class="legend-color" style="background: #e74c3c;"></div>
+                  <span>优秀 (>0.9)</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-color" style="background: #f39c12;"></div>
+                  <span>良好 (0.7-0.9)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分类模型性能 -->
+        <div class="col-lg-4 mb-4">
+          <div class="performance-card-enhanced fade-in" style="animation-delay: 0.2s;">
+            <div class="card-header-performance">
+              <div class="header-icon">
+                <i class="fas fa-bullseye"></i>
+              </div>
+              <div>
+                <h5 class="mb-1">分类模型性能</h5>
+                <p class="text-muted small mb-0">自动产品识别准确率</p>
+              </div>
+            </div>
+
+            <div class="circular-progress-enhanced">
+              <div class="progress-circle-wrapper">
+                <svg class="progress-circle" viewBox="0 0 200 200">
+                  <circle class="progress-circle-bg" cx="100" cy="100" r="85"></circle>
+                  <circle class="progress-circle-fill" cx="100" cy="100" r="85"
+                          style="stroke-dasharray: 531.1; stroke-dashoffset: 5.311;"></circle>
+                </svg>
+                <div class="progress-circle-content">
+                  <h2 class="score-value">0.99</h2>
+                  <p class="score-label">F1 Score</p>
+                </div>
+              </div>
+
+              <div class="performance-details">
+                <div class="detail-item">
+                  <i class="fas fa-check-circle text-success"></i>
+                  <span>准确率: 99.2%</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-check-circle text-success"></i>
+                  <span>召回率: 98.8%</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-check-circle text-success"></i>
+                  <span>精确率: 99.5%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 实时性能监控 -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="performance-metrics-grid fade-in" style="animation-delay: 0.3s;">
+            <div class="metric-card">
+              <div class="metric-icon">
+                <i class="fas fa-microchip"></i>
+              </div>
+              <div class="metric-content">
+                <h3 class="metric-value">GPU</h3>
+                <p class="metric-label">加速计算</p>
+              </div>
+              <div class="metric-badge">支持</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="metric-content">
+                <h3 class="metric-value">&lt;0.2s</h3>
+                <p class="metric-label">单图处理时间</p>
+              </div>
+              <div class="metric-badge">快速</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">
+                <i class="fas fa-images"></i>
+              </div>
+              <div class="metric-content">
+                <h3 class="metric-value">1000+</h3>
+                <p class="metric-label">批量处理</p>
+              </div>
+              <div class="metric-badge">支持</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">
+                <i class="fas fa-database"></i>
+              </div>
+              <div class="metric-content">
+                <h3 class="metric-value">10GB+</h3>
+                <p class="metric-label">训练数据</p>
+              </div>
+              <div class="metric-badge">海量</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 系统说明 -->
+  <section class="system-info py-5 bg-light" id="about">
+    <div class="container">
+      <div class="text-center mb-5">
+        <div class="section-badge fade-in">
+          <i class="fas fa-info-circle mr-2"></i>
+          <span>使用指南</span>
+        </div>
+        <h2 class="section-title-enhanced">系统说明</h2>
+        <p class="section-subtitle-enhanced">了解系统功能与使用方法</p>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="info-card-enhanced fade-in" style="animation-delay: 0.1s;">
+            <div class="info-card-header">
+              <div class="info-icon-wrapper">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <h5>支持的检测类型</h5>
+            </div>
+            <ul class="feature-list-enhanced">
+              <li>
+                <div class="list-icon">
+                  <i class="fas fa-check"></i>
+                </div>
+                <span><strong>钢铁表面：</strong>夹杂物、补丁、划痕等</span>
+              </li>
+              <li>
+                <div class="list-icon">
+                  <i class="fas fa-check"></i>
+                </div>
+                <span><strong>手机屏幕：</strong>油污、划痕、污点</span>
+              </li>
+              <li>
+                <div class="list-icon">
+                  <i class="fas fa-check"></i>
+                </div>
+                <span><strong>磁瓦：</strong>气孔、断裂、裂纹、磨损</span>
+              </li>
+              <li>
+                <div class="list-icon">
+                  <i class="fas fa-check"></i>
+                </div>
+                <span><strong>太阳能板：</strong>29种缺陷与特征</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="info-card-enhanced fade-in" style="animation-delay: 0.2s;">
+            <div class="info-card-header">
+              <div class="info-icon-wrapper" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                <i class="fas fa-cogs"></i>
+              </div>
+              <h5>使用流程</h5>
+            </div>
+            <div class="workflow-steps">
+              <div class="workflow-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <h6>选择模式</h6>
+                  <p>指定类型或智能分类</p>
+                </div>
+              </div>
+              <div class="workflow-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <h6>上传图片</h6>
+                  <p>单张或批量上传</p>
+                </div>
+              </div>
+              <div class="workflow-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <h6>自动检测</h6>
+                  <p>AI标注缺陷区域</p>
+                </div>
+              </div>
+              <div class="workflow-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                  <h6>查看结果</h6>
+                  <p>统计分析与可视化</p>
+                </div>
+              </div>
+              <div class="workflow-step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                  <h6>导出报告</h6>
+                  <p>生成PDF检测报告</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="info-card-enhanced fade-in" style="animation-delay: 0.3s;">
+            <div class="info-card-header">
+              <div class="info-icon-wrapper" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);">
+                <i class="fas fa-chart-pie"></i>
+              </div>
+              <h5>结果分析</h5>
+            </div>
+            <ul class="feature-list-enhanced">
+              <li>
+                <div class="list-icon" style="background: #e53e3e;">
+                  <i class="fas fa-chart-bar"></i>
+                </div>
+                <span>缺陷统计分析</span>
+              </li>
+              <li>
+                <div class="list-icon" style="background: #38b2ac;">
+                  <i class="fas fa-images"></i>
+                </div>
+                <span>可视化标注结果</span>
+              </li>
+              <li>
+                <div class="list-icon" style="background: #805ad5;">
+                  <i class="fas fa-folder-open"></i>
+                </div>
+                <span>自动分类存储</span>
+              </li>
+              <li>
+                <div class="list-icon" style="background: #d69e2e;">
+                  <i class="fas fa-file-pdf"></i>
+                </div>
+                <span>PDF报告生成</span>
+              </li>
+              <li>
+                <div class="list-icon" style="background: #3182ce;">
+                  <i class="fas fa-palette"></i>
+                </div>
+                <span>直观的颜色编码系统</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-5">
+        <div class="col-md-12">
+          <div class="tech-info-enhanced fade-in" style="animation-delay: 0.4s;">
+            <div class="tech-header">
+              <i class="fas fa-microchip mr-3"></i>
+              <h5>技术架构</h5>
+            </div>
+            <div class="tech-stack">
+              <div class="tech-category">
+                <h6>深度学习框架</h6>
+                <div class="tech-badges">
+                  <span class="badge-tech">PyTorch</span>
+                  <span class="badge-tech">CUDA加速</span>
+                </div>
+              </div>
+              <div class="tech-category">
+                <h6>模型架构</h6>
+                <div class="tech-badges">
+                  <span class="badge-tech">U-Net</span>
+                  <span class="badge-tech">EfficientNet-B4</span>
+                  <span class="badge-tech">对比学习</span>
+                </div>
+              </div>
+              <div class="tech-category">
+                <h6>核心特性</h6>
+                <div class="tech-badges">
+                  <span class="badge-tech">实时检测</span>
+                  <span class="badge-tech">高精度分割</span>
+                  <span class="badge-tech">多任务学习</span>
+                  <span class="badge-tech">批量处理</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer class="footer-gradient text-white py-4 mt-0">
+    <div class="container text-center">
+      <p class="mb-0">工业表面缺陷智能检测系统 &copy; {{ current_year }}</p>
+      <small>Powered by Deep Learning Technology</small>
+    </div>
+  </footer>
+
+  <!-- 样式 -->
+  <style>
+    /* Hero Section Enhanced */
+    .hero-section-enhanced {
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .min-vh-80 {
+      min-height: 80vh;
+    }
+
+    .hero-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+    }
+
+    .hero-gradient-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .hero-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      animation: float-bg 20s ease-in-out infinite;
+    }
+
+    @keyframes float-bg {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .hero-title {
+      animation: slideInLeft 0.8s ease-out;
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .gradient-text {
+      background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .text-white-80 {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Hero Stats Enhanced */
+    .hero-stats-enhanced {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .stat-item-enhanced {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 1rem 1.5rem;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-item-enhanced:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-icon-wrapper {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .stat-pulse {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0;
+      }
+    }
+
+    .stat-content {
+      position: relative;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1;
+      display: inline-block;
+    }
+
+    .stat-suffix {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    .stat-text {
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0;
+    }
+
+    /* Hero Actions */
+    .hero-actions {
+      animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
+    .btn-hero-primary {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .btn-hero-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+      color: #667eea;
+    }
+
+    .btn-hero-secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid white;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-hero-secondary:hover {
+      background: white;
+      color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    .btn-shine {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(102, 126, 234, 0.3) 50%, transparent 70%);
+      transform: rotate(45deg) translateX(-100%);
+      transition: transform 0.6s;
+    }
+
+    .btn-hero-primary:hover .btn-shine {
+      transform: rotate(45deg) translateX(100%);
+    }
+
+    /* Hero Visual */
+    .hero-visual {
+      position: relative;
+      height: 500px;
+      animation: fadeIn 1s ease-out 0.8s both;
+    }
+
+    .hero-3d-wrapper {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 0 auto;
+      transform-style: preserve-3d;
+      animation: rotate3d 20s linear infinite;
+    }
+
+    @keyframes rotate3d {
+      from { transform: rotateX(0) rotateY(0); }
+      to { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    .hero-cube {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    .cube-face {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+    }
+
+    .cube-front  { transform: rotateY(0deg) translateZ(100px); }
+    .cube-back   { transform: rotateY(180deg) translateZ(100px); }
+    .cube-right  { transform: rotateY(90deg) translateZ(100px); }
+    .cube-left   { transform: rotateY(-90deg) translateZ(100px); }
+    .cube-top    { transform: rotateX(90deg) translateZ(100px); }
+    .cube-bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+    /* Orbit Rings */
+    .orbit-ring {
+      position: absolute;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+    }
+
+    .orbit-1 {
+      width: 350px;
+      height: 350px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotateX(60deg);
+      animation: orbit1 15s linear infinite;
+    }
+
+    .orbit-2 {
+      width: 400px;
+      height: 400px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotateY(60deg);
+      animation: orbit2 20s linear infinite;
+    }
+
+    .orbit-3 {
+      width: 450px;
+      height: 450px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotateZ(60deg);
+      animation: orbit3 25s linear infinite;
+    }
+
+    @keyframes orbit1 {
+      from { transform: translate(-50%, -50%) rotateX(60deg) rotateZ(0deg); }
+      to { transform: translate(-50%, -50%) rotateX(60deg) rotateZ(360deg); }
+    }
+
+    @keyframes orbit2 {
+      from { transform: translate(-50%, -50%) rotateY(60deg) rotateZ(0deg); }
+      to { transform: translate(-50%, -50%) rotateY(60deg) rotateZ(360deg); }
+    }
+
+    @keyframes orbit3 {
+      from { transform: translate(-50%, -50%) rotateZ(60deg) rotateY(0deg); }
+      to { transform: translate(-50%, -50%) rotateZ(60deg) rotateY(360deg); }
+    }
+
+    .orbit-dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: white;
+      border-radius: 50%;
+      top: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Floating Badges */
+    .floating-badges {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .floating-badge {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #667eea;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      animation: float-badge 6s ease-in-out infinite;
+    }
+
+    .badge-1 {
+      top: 20%;
+      left: -50px;
+      animation-delay: 0s;
+    }
+
+    .badge-2 {
+      top: 50%;
+      right: -50px;
+      animation-delay: 2s;
+    }
+
+    .badge-3 {
+      bottom: 20%;
+      left: -30px;
+      animation-delay: 4s;
+    }
+
+    @keyframes float-badge {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    /* Hero Wave */
+    .hero-wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      line-height: 0;
+    }
+
+    .hero-wave svg {
+      position: relative;
+      display: block;
+      width: calc(100% + 1.3px);
+      height: 100px;
+    }
+
+    /* Section Enhancements */
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .section-title-enhanced {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle-enhanced {
+      font-size: 1.1rem;
+      color: #718096;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Feature Cards Premium */
+    .feature-card-premium {
+      background: white;
+      border-radius: 25px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 1px solid #f0f0f0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-card-premium:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card-premium.special-card {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+      border: 2px solid #667eea;
+    }
+
+    .card-glow {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .feature-card-premium:hover .card-glow {
+      opacity: 1;
+    }
+
+    .card-ribbon-enhanced {
+      position: absolute;
+      top: 20px;
+      right: -30px;
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+      padding: 0.5rem 3rem;
+      transform: rotate(45deg);
+      font-size: 0.8rem;
+      font-weight: 700;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .card-icon-3d {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .icon-inner {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: white;
+      position: relative;
+      z-index: 2;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card-premium:hover .icon-inner {
+      transform: translateY(-5px) rotate(10deg);
+    }
+
+    .icon-shadow {
+      position: absolute;
+      bottom: -10px;
+      left: 10px;
+      right: 10px;
+      height: 20px;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.2) 0%, transparent 70%);
+      filter: blur(10px);
+    }
+
+    .card-features {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .feature-tag {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      color: #4a5568;
+    }
+
+    .feature-tag i {
+      color: #667eea;
+    }
+
+    .card-stats {
+      display: flex;
+      justify-content: space-around;
+      margin: 1rem 0;
+      padding: 1rem 0;
+      border-top: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stat-mini {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #718096;
+    }
+
+    .stat-mini i {
+      color: #667eea;
+    }
+
+    .btn-gradient-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      position: relative;
+      overflow: hidden;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-gradient-success {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+      border: none;
+      position: relative;
+      overflow: hidden;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-gradient-primary:hover,
+    .btn-gradient-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      color: white;
+    }
+
+    .btn-arrow {
+      position: absolute;
+      right: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: all 0.3s ease;
+    }
+
+    .btn-gradient-primary:hover .btn-arrow,
+    .btn-gradient-success:hover .btn-arrow {
+      right: 20px;
+    }
+
+    /* Performance Section Enhanced */
+    .system-performance-enhanced {
+      background: #f8fafc;
+      position: relative;
+    }
+
+    .performance-card-enhanced {
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .performance-card-enhanced:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header-performance {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .header-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    .performance-chart-container {
+      padding: 2rem;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-item {
+      text-align: center;
+    }
+
+    .chart-bar-wrapper {
+      height: 200px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .chart-bar {
+      width: 60px;
+      height: calc(var(--score) * 1%);
+      position: relative;
+      transition: all 0.5s ease;
+      animation: growBar 1s ease-out;
+    }
+
+    @keyframes growBar {
+      from {
+        height: 0;
+      }
+    }
+
+    .bar-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to top, #e74c3c, #c0392b);
+      border-radius: 10px 10px 0 0;
+    }
+
+    .chart-item[data-score="78"] .bar-fill {
+      background: linear-gradient(to top, #f39c12, #d68910);
+    }
+
+    .bar-glow {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      height: 30px;
+      background: radial-gradient(ellipse at center, rgba(231, 76, 60, 0.3) 0%, transparent 70%);
+      filter: blur(15px);
+    }
+
+    .chart-value {
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #2d3748;
+    }
+
+    .chart-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: #4a5568;
+      font-size: 0.9rem;
+    }
+
+    .chart-label i {
+      font-size: 1.5rem;
+      color: #667eea;
+    }
+
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: #718096;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+    }
+
+    /* Circular Progress Enhanced */
+    .circular-progress-enhanced {
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .progress-circle-wrapper {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 2rem;
+    }
+
+    .progress-circle {
+      transform: rotate(-90deg);
+    }
+
+    .progress-circle-bg {
+      fill: none;
+      stroke: #e2e8f0;
+      stroke-width: 15;
+    }
+
+    .progress-circle-fill {
+      fill: none;
+      stroke: url(#gradient);
+      stroke-width: 15;
+      stroke-linecap: round;
+      animation: fillCircle 2s ease-out;
+    }
+
+    @keyframes fillCircle {
+      from {
+        stroke-dashoffset: 534.07;
+      }
+    }
+
+    .progress-circle-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .score-value {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+    }
+
+    .score-label {
+      color: #718096;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .performance-details {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: #f8fafc;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #4a5568;
+    }
+
+    .detail-item i {
+      font-size: 1.2rem;
+    }
+
+    /* Performance Metrics Grid */
+    .performance-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .metric-card {
+      background: white;
+      border-radius: 20px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 1px solid #e2e8f0;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .metric-content {
+      flex: 1;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin: 0;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: #718096;
+      margin: 0;
+    }
+
+    .metric-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #48bb78;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Info Cards Enhanced */
+    .info-card-enhanced {
+      background: white;
+      border-radius: 25px;
+      padding: 2rem;
+      height: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border: 1px solid #f0f0f0;
+    }
+
+    .info-card-enhanced:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .info-card-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-icon-wrapper {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .feature-list-enhanced {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .feature-list-enhanced li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      color: #4a5568;
+    }
+
+    .list-icon {
+      width: 24px;
+      height: 24px;
+      background: #48bb78;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    /* Workflow Steps */
+    .workflow-steps {
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .workflow-steps::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 30px;
+      bottom: 30px;
+      width: 2px;
+      background: linear-gradient(to bottom, #667eea, #764ba2);
+    }
+
+    .workflow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .step-number {
+      position: absolute;
+      left: -24px;
+      width: 30px;
+      height: 30px;
+      background: white;
+      border: 3px solid #667eea;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #667eea;
+      font-size: 0.9rem;
+    }
+
+    .step-content h6 {
+      margin: 0 0 0.25rem 0;
+      color: #2d3748;
+      font-weight: 600;
+    }
+
+    .step-content p {
+      margin: 0;
+      color: #718096;
+      font-size: 0.85rem;
+    }
+
+    /* Tech Info Enhanced */
+    .tech-info-enhanced {
+      background: white;
+      border-radius: 25px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .tech-header {
+      display: flex;
+      align-items: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 1.5rem;
+    }
+
+    .tech-header i {
+      font-size: 1.5rem;
+      color: #667eea;
+    }
+
+    .tech-header h5 {
+      margin: 0;
+      color: #2d3748;
+    }
+
+    .tech-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+
+    .tech-category h6 {
+      color: #4a5568;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .tech-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .badge-tech {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .badge-tech:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Fade In Animation */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Number Counter Animation */
+    .stat-number {
+      display: inline-block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-3d-wrapper {
+        transform: scale(0.7);
+      }
+
+      .floating-badge {
+        display: none;
+      }
+
+      .hero-stats-enhanced {
+        justify-content: center;
+      }
+
+      .chart-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+
+      .chart-bar-wrapper {
+        height: 150px;
+      }
+
+      .performance-metrics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tech-stack {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <!-- 添加渐变定义 -->
+  <svg width="0" height="0">
+    <defs>
+      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#48bb78;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#38a169;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- 脚本 -->
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+    // 数字增长动画
+    function animateValue(element, start, end, duration) {
+      const range = end - start;
+      const increment = end > start ? 1 : -1;
+      const stepTime = Math.abs(Math.floor(duration / range));
+      let current = start;
+
+      const timer = setInterval(function() {
+        current += increment;
+        element.textContent = current;
+        if (current == end) {
+          clearInterval(timer);
+        }
+      }, stepTime);
+    }
+
+    // 当元素进入视口时触发动画
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const element = entry.target;
+          const endValue = parseInt(element.getAttribute('data-count'));
+          if (endValue) {
+            animateValue(element, 0, endValue, 1000);
+            observer.unobserve(element);
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    // 观察所有需要动画的数字
+    document.querySelectorAll('.stat-number').forEach(element => {
+      if (element.hasAttribute('data-count')) {
+        observer.observe(element);
+      }
+    });
+
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

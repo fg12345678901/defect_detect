@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ task_info.task_name_cn }}检测 - 工业表面缺陷检测系统</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <i class="fas fa-microscope mr-2"></i>工业表面缺陷智能检测系统
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">首页</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">{{ task_info.task_name_cn }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 任务头部 -->
+  <section class="hero-section-task py-5">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <h1 class="display-4 font-weight-bold text-white mb-4 animated-title">
+            {% if task == 'steel' %}
+              <i class="fas fa-industry mr-3"></i>
+            {% elif task == 'phone' %}
+              <i class="fas fa-mobile-alt mr-3"></i>
+            {% elif task == 'magnetic' %}
+              <i class="fas fa-magnet mr-3"></i>
+            {% elif task == 'solar-panel' %}
+              <i class="fas fa-solar-panel mr-3"></i>
+            {% endif %}
+            {{ task_info.task_name_cn }}检测
+          </h1>
+          <p class="lead text-white-80 mb-4">
+            专业检测{{ task_info.task_name_cn }}中的各类缺陷，采用深度学习技术，准确率高达95%以上
+          </p>
+          <div class="feature-highlights">
+            <div class="highlight-item">
+              <i class="fas fa-layer-group"></i>
+              <span>{{ task_info.class_names|length }}种缺陷</span>
+            </div>
+            <div class="highlight-item">
+              <i class="fas fa-bolt"></i>
+              <span>实时检测</span>
+            </div>
+            <div class="highlight-item">
+              <i class="fas fa-chart-bar"></i>
+              <span>详细报告</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6 text-center">
+          <div class="hero-icon-wrapper">
+            <div class="hero-icon-bg"></div>
+            <div class="hero-icon">
+              {% if task == 'steel' %}
+                <i class="fas fa-industry"></i>
+              {% elif task == 'phone' %}
+                <i class="fas fa-mobile-alt"></i>
+              {% elif task == 'magnetic' %}
+                <i class="fas fa-magnet"></i>
+              {% elif task == 'solar-panel' %}
+                <i class="fas fa-solar-panel"></i>
+              {% endif %}
+            </div>
+            <div class="floating-particles">
+              <div class="particle particle-1"></div>
+              <div class="particle particle-2"></div>
+              <div class="particle particle-3"></div>
+              <div class="particle particle-4"></div>
+            </div>
+            <div class="rotating-border"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 主内容 -->
+  <div class="container py-5">
+    <!-- 缺陷类型说明 -->
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <h3 class="text-center mb-4 section-title">
+          <span>可检测的缺陷类型</span>
+        </h3>
+        <div class="defect-types-enhanced">
+          <div class="defect-card-container">
+            {% for cls_id, cls_info in task_info.class_names.items() %}
+            <div class="defect-card fade-in" style="animation-delay: {{ loop.index * 0.05 }}s;">
+              <div class="defect-card-inner">
+                <div class="defect-icon-wrapper">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="defect-content">
+                  <span class="defect-badge defect-{{ task }}-{{ cls_id }}">
+                    {{ cls_info.cn }}
+                  </span>
+                  <small class="defect-name-en">{{ cls_info.en }}</small>
+                </div>
+              </div>
+              <div class="defect-hover-effect"></div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 检测选项 -->
+    <div class="row">
+      <!-- 单张检测 -->
+      <div class="col-lg-6 mb-4">
+        <div class="detection-card h-100 fade-in" style="animation-delay: 0.1s;">
+          <div class="card-header-gradient single-detect">
+            <div class="card-icon-enhanced">
+              <i class="fas fa-image"></i>
+            </div>
+            <h4 class="card-title mb-0">单张图像检测</h4>
+          </div>
+          <div class="card-body p-4">
+            <p class="card-description text-muted mb-4">
+              上传单张图片进行快速检测，实时查看检测结果和缺陷标注
+            </p>
+
+            <form action="{{ url_for('task_single', task=task) }}" method="POST" enctype="multipart/form-data" id="singleForm">
+              <div class="upload-area-single" id="uploadAreaSingle">
+                <input type="file" class="custom-file-input" id="singleFile" name="image" accept="image/*" required>
+                <div class="upload-content-single">
+                  <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                  <h5 class="mt-3 mb-2">拖拽图片到此处</h5>
+                  <p class="text-muted mb-3">或点击选择文件</p>
+                  <button type="button" class="btn btn-primary btn-choose" onclick="document.getElementById('singleFile').click()">
+                    <i class="fas fa-folder-open mr-2"></i>选择图片
+                  </button>
+                </div>
+              </div>
+
+              <!-- 图片预览 -->
+              <div class="image-preview-container" id="previewContainer" style="display: none;">
+                <div class="preview-header">
+                  <div class="preview-info">
+                    <i class="fas fa-image mr-2"></i>
+                    <span id="fileName">图片预览</span>
+                  </div>
+                  <button type="button" class="btn-remove" onclick="clearSingleFile()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div class="preview-body">
+                  <img id="singlePreview" class="img-fluid rounded" alt="预览">
+                </div>
+                <div class="preview-stats">
+                  <div class="stat-mini">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span>文件已选择</span>
+                  </div>
+                  <div class="stat-mini">
+                    <i class="fas fa-file-image text-primary"></i>
+                    <span id="fileSize">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-gradient btn-block mt-4 submit-btn-enhanced" id="singleSubmitBtn" disabled>
+                <i class="fas fa-search mr-2"></i>开始检测
+                <span class="btn-shine"></span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 批量检测 -->
+      <div class="col-lg-6 mb-4">
+        <div class="detection-card h-100 fade-in" style="animation-delay: 0.2s;">
+          <div class="card-header-gradient batch-detect">
+            <div class="card-icon-enhanced">
+              <i class="fas fa-images"></i>
+            </div>
+            <h4 class="card-title mb-0">批量图像检测</h4>
+          </div>
+          <div class="card-body p-4">
+            <p class="card-description text-muted mb-4">
+              选择文件夹批量上传，自动处理并生成详细的统计分析报告
+            </p>
+
+            <form action="{{ url_for('start_batch', task=task) }}" method="POST" enctype="multipart/form-data" id="batchForm">
+              <div class="upload-area-batch" id="uploadAreaBatch">
+                <input type="file" class="custom-file-input" id="batchFiles" name="images" multiple webkitdirectory directory required>
+                <div class="upload-content-batch">
+                  <i class="fas fa-folder-open upload-icon"></i>
+                  <h5 class="mt-3 mb-2">选择文件夹</h5>
+                  <p class="text-muted mb-3">支持批量上传处理</p>
+                  <button type="button" class="btn btn-success btn-choose" onclick="document.getElementById('batchFiles').click()">
+                    <i class="fas fa-folder-open mr-2"></i>选择文件夹
+                  </button>
+                </div>
+              </div>
+
+              <div id="batchInfo" class="batch-info-stats mt-3" style="display: none;">
+                <div class="stat-item">
+                  <i class="fas fa-images"></i>
+                  <div>
+                    <span class="stat-value" id="fileNumber">0</span>
+                    <span class="stat-label">个文件</span>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <i class="fas fa-hdd"></i>
+                  <div>
+                    <span class="stat-value" id="totalSize">0 MB</span>
+                    <span class="stat-label">总大小</span>
+                  </div>
+                </div>
+                <div class="stat-item">
+                  <i class="fas fa-clock"></i>
+                  <div>
+                    <span class="stat-value" id="estimatedTime">0</span>
+                    <span class="stat-label">预计用时(分)</span>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-success btn-block mt-4 submit-btn-enhanced" id="batchSubmitBtn" disabled>
+                <i class="fas fa-play mr-2"></i>开始批量检测
+                <span class="btn-shine"></span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 使用说明 -->
+    <div class="row mt-5">
+      <div class="col-md-12">
+        <h3 class="text-center mb-4 section-title">
+          <span>使用流程</span>
+        </h3>
+        <div class="workflow-cards">
+          <div class="workflow-card fade-in" style="animation-delay: 0.1s;">
+            <div class="workflow-icon">
+              <i class="fas fa-upload"></i>
+              <div class="icon-bg-pulse"></div>
+            </div>
+            <h6>上传图片</h6>
+            <p class="text-muted small">选择需要检测的{{ task_info.task_name_cn }}图片，支持JPG、PNG、BMP格式</p>
+          </div>
+          <div class="workflow-arrow">
+            <i class="fas fa-chevron-right"></i>
+          </div>
+          <div class="workflow-card fade-in" style="animation-delay: 0.2s;">
+            <div class="workflow-icon" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+              <i class="fas fa-cog"></i>
+              <div class="icon-bg-pulse"></div>
+            </div>
+            <h6>智能检测</h6>
+            <p class="text-muted small">AI自动识别并标注各类缺陷，使用不同颜色区分缺陷类型</p>
+          </div>
+          <div class="workflow-arrow">
+            <i class="fas fa-chevron-right"></i>
+          </div>
+          <div class="workflow-card fade-in" style="animation-delay: 0.3s;">
+            <div class="workflow-icon" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);">
+              <i class="fas fa-chart-bar"></i>
+              <div class="icon-bg-pulse"></div>
+            </div>
+            <h6>查看结果</h6>
+            <p class="text-muted small">可视化展示检测结果，提供详细的缺陷分布统计报告</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="footer-gradient text-white py-4 mt-5">
+    <div class="container text-center">
+      <p class="mb-0">工业表面缺陷智能检测系统 &copy; {{ current_year }}</p>
+      <small>Powered by Deep Learning Technology</small>
+    </div>
+  </footer>
+
+  <!-- 样式 -->
+  <style>
+    /* Hero Section */
+    .hero-section-task {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section-task::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .animated-title {
+      animation: slideInLeft 0.8s ease-out;
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .text-white-80 {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .feature-highlights {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .highlight-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .highlight-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .highlight-item i {
+      font-size: 1.2rem;
+    }
+
+    /* Hero Icon */
+    .hero-icon-wrapper {
+      position: relative;
+      height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-icon-bg {
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    .hero-icon {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      background: white;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      color: #667eea;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      animation: float 6s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    .rotating-border {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 220px;
+      border: 3px dashed rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.1); opacity: 0.1; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25% { transform: translateY(-20px) rotate(5deg); }
+      75% { transform: translateY(20px) rotate(-5deg); }
+    }
+
+    .floating-particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .particle {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+    }
+
+    .particle-1 {
+      top: 10%;
+      left: 10%;
+      animation: float-particle 8s ease-in-out infinite;
+    }
+
+    .particle-2 {
+      top: 80%;
+      left: 20%;
+      animation: float-particle 10s ease-in-out infinite;
+      animation-delay: 1s;
+    }
+
+    .particle-3 {
+      top: 20%;
+      right: 10%;
+      animation: float-particle 12s ease-in-out infinite;
+      animation-delay: 2s;
+    }
+
+    .particle-4 {
+      bottom: 10%;
+      right: 20%;
+      animation: float-particle 9s ease-in-out infinite;
+      animation-delay: 3s;
+    }
+
+    @keyframes float-particle {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(30px, -30px); }
+      50% { transform: translate(-30px, 30px); }
+      75% { transform: translate(30px, 30px); }
+    }
+
+    /* Section Title */
+    .section-title {
+      position: relative;
+      margin-bottom: 3rem;
+    }
+
+    .section-title span {
+      position: relative;
+      display: inline-block;
+      padding: 0 2rem;
+      color: #2d3748;
+      font-weight: 700;
+    }
+
+    .section-title::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+    }
+
+    .section-title span::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120%;
+      height: 40px;
+      background: white;
+      z-index: -1;
+    }
+
+    /* Enhanced Defect Types with Colors */
+    .defect-types-enhanced {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .defect-card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .defect-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .defect-card-inner {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+    }
+
+    .defect-card:hover .defect-card-inner {
+      background: white;
+      transform: translateY(-3px);
+    }
+
+    .defect-card:hover {
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .defect-icon-wrapper {
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .defect-card:hover .defect-icon-wrapper {
+      transform: rotate(10deg) scale(1.1);
+    }
+
+    .defect-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .defect-badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-block;
+      width: fit-content;
+      transition: all 0.3s ease;
+    }
+
+    .defect-name-en {
+      color: #718096;
+      font-size: 0.8rem;
+      margin-left: 0.2rem;
+    }
+
+    .defect-hover-effect {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .defect-card:hover .defect-hover-effect {
+      left: 100%;
+    }
+
+    /* Detection Cards */
+    .detection-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 1px solid #f0f0f0;
+    }
+
+    .detection-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header-gradient {
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .card-header-gradient.single-detect {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card-header-gradient.batch-detect {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    }
+
+    .card-icon-enhanced {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 2.5rem;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .detection-card:hover .card-icon-enhanced {
+      transform: rotate(10deg) scale(1.1);
+    }
+
+    .card-title {
+      color: white;
+      font-weight: 600;
+    }
+
+    .card-description {
+      line-height: 1.6;
+    }
+
+    /* Upload Areas */
+    .upload-area-single,
+    .upload-area-batch {
+      border: 3px dashed #e0e0e0;
+      border-radius: 15px;
+      padding: 3rem 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      background: #f8f9fa;
+      position: relative;
+    }
+
+    .upload-area-single:hover,
+    .upload-area-batch:hover {
+      border-color: #667eea;
+      background: #f3f4f6;
+    }
+
+    .upload-area-single.dragover {
+      border-color: #48bb78;
+      background: #e6fffa;
+      transform: scale(1.02);
+    }
+
+    .upload-icon {
+      font-size: 3.5rem;
+      color: #667eea;
+    }
+
+    .upload-content-single h5,
+    .upload-content-batch h5 {
+      color: #2d3748;
+      font-weight: 600;
+    }
+
+    .btn-choose {
+      transition: all 0.3s ease;
+    }
+
+    .btn-choose:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Image Preview */
+    .image-preview-container {
+      border: 1px solid #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      background: white;
+      margin-top: 1rem;
+    }
+
+    .preview-header {
+      background: #f8f9fa;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .preview-info {
+      display: flex;
+      align-items: center;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-remove:hover {
+      background: rgba(220, 53, 69, 0.1);
+    }
+
+    .preview-body {
+      padding: 1rem;
+      text-align: center;
+      max-height: 300px;
+      overflow: hidden;
+    }
+
+    #singlePreview {
+      max-height: 250px;
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .preview-stats {
+      background: #f8f9fa;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .stat-mini {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    /* Batch Info */
+    .batch-info-stats {
+      display: flex;
+      justify-content: space-around;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 15px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stat-item i {
+      font-size: 1.8rem;
+      color: #48bb78;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    /* Submit Buttons */
+    .submit-btn-enhanced {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: none;
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+    }
+
+    .submit-btn-enhanced:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-shine {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+      transform: rotate(45deg) translateX(-100%);
+      transition: transform 0.6s;
+    }
+
+    .submit-btn-enhanced:not(:disabled):hover .btn-shine {
+      transform: rotate(45deg) translateX(100%);
+    }
+
+    /* Workflow Cards */
+    .workflow-cards {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .workflow-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      flex: 1;
+      min-width: 250px;
+      max-width: 300px;
+      transition: all 0.3s ease;
+      border: 1px solid #f0f0f0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .workflow-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .workflow-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .workflow-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .workflow-icon {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.8rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .workflow-card:hover .workflow-icon {
+      transform: rotate(360deg);
+    }
+
+    .icon-bg-pulse {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      border-radius: inherit;
+      opacity: 0.3;
+      animation: pulse-expand 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-expand {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+      }
+    }
+
+    .workflow-arrow {
+      font-size: 2rem;
+      color: #cbd5e0;
+    }
+
+    /* Fade In Animation */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-icon-wrapper {
+        margin-top: 3rem;
+        transform: scale(0.8);
+      }
+
+      .workflow-cards {
+        flex-direction: column;
+      }
+
+      .workflow-arrow {
+        transform: rotate(90deg);
+      }
+
+      .defect-card-container {
+        grid-template-columns: 1fr;
+      }
+
+      .batch-info-stats {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+
+  <!-- 脚本 -->
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+    // 单张图片上传处理
+    const singleFile = document.getElementById('singleFile');
+    const uploadAreaSingle = document.getElementById('uploadAreaSingle');
+    const singleSubmitBtn = document.getElementById('singleSubmitBtn');
+    const uploadContentSingle = document.querySelector('.upload-content-single');
+    const previewContainer = document.getElementById('previewContainer');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+
+    // 拖拽上传
+    uploadAreaSingle.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.classList.add('dragover');
+    });
+
+    uploadAreaSingle.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+    });
+
+    uploadAreaSingle.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0 && files[0].type.startsWith('image/')) {
+        singleFile.files = files;
+        handleSingleFile(files[0]);
+      }
+    });
+
+    // 点击上传区域
+    uploadAreaSingle.addEventListener('click', function(e) {
+      if (e.target.closest('button') || e.target.closest('.image-preview-container')) return;
+      singleFile.click();
+    });
+
+    // 文件选择处理
+    singleFile.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        handleSingleFile(file);
+      }
+    });
+
+    function handleSingleFile(file) {
+      // 显示预览
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById('singlePreview');
+        preview.src = e.target.result;
+        uploadAreaSingle.style.display = 'none';
+        previewContainer.style.display = 'block';
+        fileName.textContent = file.name;
+        fileSize.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+        singleSubmitBtn.disabled = false;
+      }
+      reader.readAsDataURL(file);
+    }
+
+    function clearSingleFile() {
+      singleFile.value = '';
+      uploadAreaSingle.style.display = 'block';
+      previewContainer.style.display = 'none';
+      singleSubmitBtn.disabled = true;
+    }
+
+    // 批量文件处理
+    const batchFiles = document.getElementById('batchFiles');
+    const batchSubmitBtn = document.getElementById('batchSubmitBtn');
+    const batchInfo = document.getElementById('batchInfo');
+    const fileNumber = document.getElementById('fileNumber');
+    const totalSize = document.getElementById('totalSize');
+    const estimatedTime = document.getElementById('estimatedTime');
+
+    batchFiles.addEventListener('change', function(e) {
+      const files = e.target.files;
+      if (files.length > 0) {
+        fileNumber.textContent = files.length;
+
+        // 计算总大小
+        let size = 0;
+        for (let i = 0; i < files.length; i++) {
+          size += files[i].size;
+        }
+        totalSize.textContent = `${(size / (1024 * 1024)).toFixed(2)} MB`;
+
+        // 估算时间（每张图片约2秒）
+        const estimatedMinutes = Math.ceil((files.length * 2) / 60);
+        estimatedTime.textContent = estimatedMinutes;
+
+        batchInfo.style.display = 'flex';
+        batchSubmitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

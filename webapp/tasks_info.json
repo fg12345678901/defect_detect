@@ -1,0 +1,69 @@
+{
+  "tasks": {
+    "steel": {
+      "task_name_cn": "钢铁表面缺陷",
+      "task_name_en": "Steel Surface Defect",
+      "class_names": {
+        "1": {"en": "Inclusion", "cn": "夹杂物"},
+        "2": {"en": "Patches", "cn": "补丁"},
+        "3": {"en": "Scratches", "cn": "划痕"},
+        "4": {"en": "Other Defects", "cn": "其他缺陷"}
+      }
+    },
+    "phone": {
+      "task_name_cn": "手机表面缺陷",
+      "task_name_en": "Phone Surface Defect",
+      "class_names": {
+        "1": {"en": "Oil", "cn": "油污"},
+        "2": {"en": "Scratch", "cn": "划痕"},
+        "3": {"en": "Stain", "cn": "污点"}
+      }
+    },
+    "magnetic": {
+      "task_name_cn": "磁瓦缺陷",
+      "task_name_en": "Magnetic Tile Defect",
+      "class_names": {
+        "1": {"en": "Blowhole", "cn": "气孔"},
+        "2": {"en": "Break", "cn": "断裂"},
+        "3": {"en": "Crack", "cn": "裂纹"},
+        "4": {"en": "Fray", "cn": "磨损"},
+        "5": {"en": "Uneven", "cn": "不平整"}
+      }
+    },
+    "solar-panel": {
+      "task_name_cn": "太阳能板缺陷与特征",
+      "task_name_en": "Solar Panel Defect & Feature",
+      "class_names": {
+        "0": {"en": "bckgnd", "cn": "背景"},
+        "1": {"en": "sp multi", "cn": "多晶硅"},
+        "2": {"en": "sp mono", "cn": "单晶硅"},
+        "3": {"en": "sp dogbone", "cn": "狗骨状连接"},
+        "4": {"en": "ribbons", "cn": "焊带"},
+        "5": {"en": "border", "cn": "边框"},
+        "6": {"en": "text", "cn": "丝印文字"},
+        "7": {"en": "padding", "cn": "填充区域"},
+        "8": {"en": "clamp", "cn": "夹具"},
+        "9": {"en": "busbars", "cn": "主栅线"},
+        "10": {"en": "crack rbn edge", "cn": "焊带边缘裂纹"},
+        "11": {"en": "inactive", "cn": "不活动区域"},
+        "12": {"en": "rings", "cn": "环形纹"},
+        "13": {"en": "material", "cn": "材料缺陷"},
+        "14": {"en": "crack", "cn": "裂纹"},
+        "15": {"en": "gridline", "cn": "栅线问题"},
+        "16": {"en": "splice", "cn": "接合问题"},
+        "17": {"en": "dead cell", "cn": "失效单元"},
+        "18": {"en": "corrosion rbn", "cn": "焊带腐蚀"},
+        "19": {"en": "belt mark", "cn": "传送带痕迹"},
+        "20": {"en": "edge dark", "cn": "边缘变暗"},
+        "21": {"en": "frame edge", "cn": "框架边缘"},
+        "22": {"en": "jbox", "cn": "接线盒"},
+        "23": {"en": "meas artifact", "cn": "测量伪影"},
+        "24": {"en": "sp mono halfcut", "cn": "单晶半切"},
+        "25": {"en": "scuff", "cn": "磨损痕迹"},
+        "26": {"en": "corrosion cell", "cn": "电池腐蚀"},
+        "27": {"en": "brightening", "cn": "亮化"},
+        "28": {"en": "star", "cn": "星状裂纹"}
+      }
+    }
+  }
+}

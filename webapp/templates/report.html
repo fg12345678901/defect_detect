@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ task_info.task_name_cn if task_info else '综合' }}缺陷检测报告</title>
+<style>
+    @font-face {
+      font-family: 'SimHei';
+      src: local('SimHei'), local('Noto Sans CJK SC'), local('Microsoft YaHei');
+    }
+    body {
+      font-family: 'SimHei', 'Noto Sans CJK SC', 'Microsoft YaHei', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      background-color: #fff;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #3498db;
+    }
+
+    .header h1 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+
+    .report-date {
+      text-align: right;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: #2c3e50;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-top: 30px;
+    }
+
+    h3 {
+      color: #3498db;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f5f7fa;
+      color: #2c3e50;
+      text-align: left;
+      padding: 12px 15px;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 10px 15px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .summary-box {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 20px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .summary-item {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      border-right: 1px solid #ddd;
+      min-width: 100px;
+    }
+
+    .summary-item:last-child {
+      border-right: none;
+    }
+
+    .summary-label {
+      font-size: 14px;
+      color: #7f8c8d;
+      margin-bottom: 5px;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .defect-value {
+      color: #e74c3c;
+    }
+
+    .chart-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .defect-list {
+      margin: 20px 0;
+    }
+
+    .defect-category {
+      margin-bottom: 15px;
+    }
+
+    .defect-heading {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .defect-files {
+      background-color: #f9f9f9;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      text-align: center;
+      color: #7f8c8d;
+      font-size: 12px;
+    }
+
+    .footer p {
+      margin: 5px 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 12px;
+      border-radius: 3px;
+      margin-right: 5px;
+    }
+
+    .badge-1 {
+      background-color: #ffecec;
+      color: #c0392b;
+    }
+
+    .badge-2 {
+      background-color: #e8f8f5;
+      color: #27ae60;
+    }
+
+    .badge-3 {
+      background-color: #ebf5fb;
+      color: #2980b9;
+    }
+
+    .badge-4 {
+      background-color: #fef9e7;
+      color: #f39c12;
+    }
+
+    .badge-5 {
+      background-color: #f4ecf7;
+      color: #8e44ad;
+    }
+
+    .badge-0 {
+      background-color: #f0f0f0;
+      color: #7f8c8d;
+    }
+
+    .category-folder {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+
+    .category-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .category-path {
+      font-size: 12px;
+      color: #7f8c8d;
+      font-family: monospace;
+    }
+
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>{{ task_info.task_name_cn if task_info else '表面' }}缺陷检测分析报告</h1>
+      <p>自动缺陷检测系统生成</p>
+    </div>
+
+    <div class="report-date">
+      报告生成时间: {{ current_datetime }}
+    </div>
+
+    {% if task == 'classify' %}
+    <!-- 综合报告 -->
+    <div class="section">
+      <h2>总体检测概况</h2>
+
+      <div class="summary-box">
+        <div class="summary-item">
+          <div class="summary-label">总图数</div>
+          <div class="summary-value">{{ stats.total_images }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">有缺陷图数</div>
+          <div class="summary-value defect-value">{{ stats.defect_images }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">缺陷率</div>
+          <div class="summary-value defect-value">
+            {% if stats.total_images > 0 %}
+              {{ '%0.1f%%'| format(stats.defect_images / stats.total_images * 100) }}
+            {% else %}
+              0%
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>产品类型分布</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>产品类型</th>
+            <th>图片数量</th>
+            <th>缺陷图片</th>
+            <th>缺陷率</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t, stat in task_stats.items() %}
+          {% if stat.total_images > 0 %}
+          <tr>
+            <td>{{ task_info.tasks[t].task_name_cn }}</td>
+            <td>{{ stat.total_images }} 张</td>
+            <td>{{ stat.defect_images }} 张</td>
+            <td>
+              {% if stat.total_images > 0 %}
+                {{ '%0.1f%%'| format(stat.defect_images / stat.total_images * 100) }}
+              {% else %}
+                0%
+              {% endif %}
+            </td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if task_pie_base64 %}
+      <div class="chart-container">
+        <img src="data:image/png;base64,{{ task_pie_base64 }}" alt="任务分布图" width="400">
+      </div>
+      {% endif %}
+    </div>
+
+    {% for t, counts in class_counts_all.items() %}
+    <div class="section">
+      <h3>{{ task_info.tasks[t].task_name_cn }}缺陷类型统计</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>缺陷类别</th>
+            <th>图片数量</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cname, cnt in counts.items() %}
+          {% if cnt > 0 %}
+          <tr>
+            <td>
+              <span class="badge badge-{{ loop.index }}">{{ cname }}</span>
+            </td>
+            <td>{{ cnt }} 张</td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if task_pie_charts[t] %}
+      <div style="text-align:center;margin-top:10px;">
+        <img src="data:image/png;base64,{{ task_pie_charts[t] }}" width="400" alt="pie">
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <!-- 单任务报告 -->
+    <div class="section">
+      <h2>检测概况</h2>
+
+      <div class="summary-box">
+        <div class="summary-item">
+          <div class="summary-label">总图数</div>
+          <div class="summary-value">{{ stats.total_images }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">有缺陷图数</div>
+          <div class="summary-value defect-value">{{ stats.defect_images }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">缺陷率</div>
+          <div class="summary-value defect-value">
+            {% if stats.total_images > 0 %}
+              {{ '%0.1f%%'| format(stats.defect_images / stats.total_images * 100) }}
+            {% else %}
+              0%
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>缺陷类型分布</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>缺陷类别</th>
+            <th>图片数量</th>
+            <th>占比</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set total_defects = stats.defect_images %}
+
+          {% for cname, cnt in class_counts_mapped.items() %}
+          {% if cnt > 0 %}
+          <tr>
+            <td>
+              <span class="badge badge-{{ loop.index }}">{{ cname }}</span>
+            </td>
+            <td>{{ cnt }} 张</td>
+            <td>
+              {% if total_defects > 0 %}
+                {{ '%0.1f%%'| format(cnt / total_defects * 100) }}
+              {% else %}
+                0%
+              {% endif %}
+            </td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart-container">
+      <h3>缺陷类别分布（饼状图）</h3>
+      {% if pie_chart_base64 %}
+        <img src="data:image/png;base64,{{ pie_chart_base64 }}" alt="缺陷饼图" width="400">
+      {% else %}
+        <p>暂无饼状图数据</p>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <h2>按缺陷类型分类存储</h2>
+
+      <p>系统已经自动将所有检测图片按缺陷类型分类存储在以下文件夹中：</p>
+
+      <!-- 无缺陷文件夹 -->
+      {% set no_defect_count = stats.total_images - stats.defect_images %}
+      {% if no_defect_count > 0 %}
+      <div class="category-folder">
+        <div class="category-title">
+          <span class="badge badge-0">无缺陷</span>
+          ({{ no_defect_count }} 张)
+        </div>
+        <div class="category-path">存储路径: static/categorized/无缺陷/</div>
+      </div>
+      {% endif %}
+
+      <!-- 缺陷类别文件夹 -->
+      {% for cname, count in class_counts_mapped.items() %}
+      {% if count > 0 %}
+      <div class="category-folder">
+        <div class="category-title">
+          <span class="badge badge-{{ loop.index }}">{{ cname }}</span>
+          ({{ count }} 张)
+        </div>
+        <div class="category-path">存储路径: static/categorized/{{ cname }}/</div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="footer">
+      <p>工业表面缺陷检测系统自动生成报告</p>
+      <p>工业表面缺陷检测系统 &copy; {{ current_year }}</p>
+    </div>
+  </div>
+</body>
+</html>

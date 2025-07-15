@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>检测进度 - 工业表面缺陷检测系统</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-dark gradient-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <i class="fas fa-microscope mr-2"></i>工业表面缺陷智能检测系统
+      </a>
+    </div>
+  </nav>
+
+  <!-- 背景装饰 -->
+  <div class="progress-page-bg">
+    <div class="bg-gradient-overlay"></div>
+    <div class="bg-particles"></div>
+    <div class="floating-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+      <div class="shape shape-4"></div>
+    </div>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
+        <div class="progress-card-enhanced fade-in">
+          <!-- 3D图标 -->
+          <div class="progress-3d-icon">
+            <div class="icon-cube">
+              <div class="cube-inner">
+                <i class="fas fa-cogs"></i>
+              </div>
+              <div class="cube-glow"></div>
+            </div>
+            <div class="orbit-particles">
+              <div class="particle"></div>
+              <div class="particle"></div>
+              <div class="particle"></div>
+              <div class="particle"></div>
+            </div>
+          </div>
+
+          <!-- 标题和说明 -->
+          <div class="text-center mb-4">
+            <h2 class="progress-title">正在进行批量检测</h2>
+            <p class="progress-subtitle">
+              <span class="typing-text">系统正在处理您上传的图像，请稍候...</span>
+              <span class="cursor">|</span>
+            </p>
+          </div>
+
+          <!-- 增强版进度条 -->
+          <div class="progress-bar-enhanced mb-5">
+            <div class="progress-wrapper">
+              <div class="progress-bg">
+                <div class="progress-fill" style="width: 0%;">
+                  <div class="progress-glow"></div>
+                  <div class="progress-stripes"></div>
+                </div>
+              </div>
+              <div class="progress-percentage">
+                <span class="percentage-value">0</span>
+                <span class="percentage-symbol">%</span>
+              </div>
+            </div>
+
+            <!-- 进度详情 -->
+            <div class="progress-details">
+              <div class="detail-card">
+                <div class="detail-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="detail-content">
+                  <div class="detail-value" id="processed-count">0</div>
+                  <div class="detail-label">已完成</div>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-icon">
+                  <i class="fas fa-images"></i>
+                </div>
+                <div class="detail-content">
+                  <div class="detail-value" id="total-count">0</div>
+                  <div class="detail-label">总数量</div>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="detail-content">
+                  <div class="detail-value" id="time-elapsed">00:00</div>
+                  <div class="detail-label">已用时</div>
+                </div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-icon">
+                  <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="detail-content">
+                  <div class="detail-value" id="speed">0</div>
+                  <div class="detail-label">张/分钟</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 处理阶段时间线 -->
+          <div class="processing-timeline mb-5">
+            <div class="timeline-item active" id="stage-1">
+              <div class="timeline-icon">
+                <i class="fas fa-upload"></i>
+                <div class="icon-pulse"></div>
+              </div>
+              <div class="timeline-content">
+                <h6>数据准备</h6>
+                <p>正在加载图像数据...</p>
+              </div>
+              <div class="timeline-connector"></div>
+            </div>
+
+            <div class="timeline-item" id="stage-2">
+              <div class="timeline-icon">
+                <i class="fas fa-robot"></i>
+                <div class="icon-pulse"></div>
+              </div>
+              <div class="timeline-content">
+                <h6>AI分析</h6>
+                <p>深度学习模型推理中...</p>
+              </div>
+              <div class="timeline-connector"></div>
+            </div>
+
+            <div class="timeline-item" id="stage-3">
+              <div class="timeline-icon">
+                <i class="fas fa-search"></i>
+                <div class="icon-pulse"></div>
+              </div>
+              <div class="timeline-content">
+                <h6>缺陷检测</h6>
+                <p>识别并标注缺陷区域...</p>
+              </div>
+              <div class="timeline-connector"></div>
+            </div>
+
+            <div class="timeline-item" id="stage-4">
+              <div class="timeline-icon">
+                <i class="fas fa-chart-pie"></i>
+                <div class="icon-pulse"></div>
+              </div>
+              <div class="timeline-content">
+                <h6>生成报告</h6>
+                <p>统计分析结果...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 实时日志 -->
+          <div class="live-log-container">
+            <div class="log-header">
+              <i class="fas fa-terminal mr-2"></i>
+              <span>实时处理日志</span>
+              <div class="log-status">
+                <span class="status-dot"></span>
+                运行中
+              </div>
+            </div>
+            <div class="log-content" id="logContent">
+              <div class="log-entry">
+                <span class="log-time">[00:00:00]</span>
+                <span class="log-message">系统初始化完成，开始处理任务...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 动态提示 -->
+          <div class="tips-carousel">
+            <div class="tip-item active">
+              <i class="fas fa-lightbulb"></i>
+              <span id="progress-tip">AI模型正在分析图像中的细节特征...</span>
+            </div>
+          </div>
+
+          <!-- 高级加载动画 -->
+          <div class="advanced-loader">
+            <div class="loader-dna">
+              <div class="dna-strand">
+                <div class="dna-circle"></div>
+                <div class="dna-circle"></div>
+                <div class="dna-circle"></div>
+                <div class="dna-circle"></div>
+                <div class="dna-circle"></div>
+                <div class="dna-circle"></div>
+                <div class="dna-circle"></div>
+                <div class="dna-circle"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 样式 -->
+  <style>
+    /* 背景装饰 */
+    .progress-page-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-gradient-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    }
+
+    .bg-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23667eea' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .floating-shapes {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+
+    .shape-1 {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      top: 10%;
+      left: 5%;
+      animation: float-shape 20s ease-in-out infinite;
+    }
+
+    .shape-2 {
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      top: 60%;
+      right: 10%;
+      animation: float-shape 25s ease-in-out infinite reverse;
+    }
+
+    .shape-3 {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      bottom: 20%;
+      left: 15%;
+      animation: float-shape 15s ease-in-out infinite;
+    }
+
+    .shape-4 {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      top: 30%;
+      right: 20%;
+      animation: float-shape 18s ease-in-out infinite reverse;
+    }
+
+    @keyframes float-shape {
+      0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      25% {
+        transform: translate(30px, -30px) rotate(90deg);
+      }
+      50% {
+        transform: translate(-20px, 20px) rotate(180deg);
+      }
+      75% {
+        transform: translate(40px, 10px) rotate(270deg);
+      }
+    }
+
+    /* 主卡片 */
+    .progress-card-enhanced {
+      background: white;
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-card-enhanced::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+      background-size: 200% 100%;
+      animation: shimmer 2s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    /* 3D图标 */
+    .progress-3d-icon {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 2rem;
+    }
+
+    .icon-cube {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin: 25px auto;
+      transform-style: preserve-3d;
+      animation: rotate-cube 10s linear infinite;
+    }
+
+    @keyframes rotate-cube {
+      0% {
+        transform: rotateX(0) rotateY(0);
+      }
+      100% {
+        transform: rotateX(360deg) rotateY(360deg);
+      }
+    }
+
+    .cube-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .cube-glow {
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+      filter: blur(20px);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% {
+        opacity: 0.5;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+
+    .orbit-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .orbit-particles .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+    }
+
+    .orbit-particles .particle:nth-child(1) {
+      animation: orbit-particle 3s linear infinite;
+    }
+
+    .orbit-particles .particle:nth-child(2) {
+      animation: orbit-particle 3s linear infinite 0.75s;
+    }
+
+    .orbit-particles .particle:nth-child(3) {
+      animation: orbit-particle 3s linear infinite 1.5s;
+    }
+
+    .orbit-particles .particle:nth-child(4) {
+      animation: orbit-particle 3s linear infinite 2.25s;
+    }
+
+    @keyframes orbit-particle {
+      0% {
+        transform: translate(-50%, -50%) rotate(0deg) translateX(80px) rotate(0deg);
+      }
+      100% {
+        transform: translate(-50%, -50%) rotate(360deg) translateX(80px) rotate(-360deg);
+      }
+    }
+
+    /* 标题样式 */
+    .progress-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-subtitle {
+      font-size: 1.1rem;
+      color: #718096;
+      display: inline-block;
+      position: relative;
+    }
+
+    .typing-text {
+      display: inline-block;
+    }
+
+    .cursor {
+      display: inline-block;
+      animation: blink 1s infinite;
+      color: #667eea;
+      font-weight: 700;
+    }
+
+    @keyframes blink {
+      0%, 50% {
+        opacity: 1;
+      }
+      51%, 100% {
+        opacity: 0;
+      }
+    }
+
+    /* 增强版进度条 */
+    .progress-bar-enhanced {
+      margin-bottom: 3rem;
+    }
+
+    .progress-wrapper {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .progress-bg {
+      height: 40px;
+      background: #e2e8f0;
+      border-radius: 50px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50px;
+      position: relative;
+      transition: width 0.5s ease;
+      overflow: hidden;
+    }
+
+    .progress-glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: progress-shine 2s linear infinite;
+    }
+
+    @keyframes progress-shine {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .progress-stripes {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+      );
+      background-size: 40px 40px;
+      animation: progress-stripes-move 1s linear infinite;
+    }
+
+    @keyframes progress-stripes-move {
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: 40px 40px;
+      }
+    }
+
+    .progress-percentage {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background: white;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .percentage-value {
+      font-size: 1.5rem;
+    }
+
+    .percentage-symbol {
+      font-size: 1rem;
+      margin-left: 2px;
+    }
+
+    /* 进度详情卡片 */
+    .progress-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .detail-card {
+      background: #f8fafc;
+      border-radius: 20px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid #e2e8f0;
+    }
+
+    .detail-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .detail-content {
+      flex: 1;
+    }
+
+    .detail-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2d3748;
+      line-height: 1;
+    }
+
+    .detail-label {
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 0.25rem;
+    }
+
+    /* 处理阶段时间线 */
+    .processing-timeline {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      padding: 0 20px;
+    }
+
+    .processing-timeline::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 50px;
+      right: 50px;
+      height: 2px;
+      background: #e2e8f0;
+      z-index: 0;
+    }
+
+    .timeline-item {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      opacity: 0.4;
+      transition: all 0.5s ease;
+    }
+
+    .timeline-item.active {
+      opacity: 1;
+    }
+
+    .timeline-item.active .timeline-icon {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: scale(1.2);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .timeline-item.active .icon-pulse {
+      display: block;
+    }
+
+    .timeline-icon {
+      width: 60px;
+      height: 60px;
+      background: #f0f0f0;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+      color: #718096;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .icon-pulse {
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border: 2px solid #667eea;
+      border-radius: 50%;
+      animation: pulse-ring 1.5s ease-out infinite;
+      display: none;
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.3);
+        opacity: 0;
+      }
+    }
+
+    .timeline-content h6 {
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-content p {
+      font-size: 0.85rem;
+      color: #718096;
+      margin: 0;
+    }
+
+    .timeline-connector {
+      position: absolute;
+      top: 30px;
+      right: -50%;
+      width: 100%;
+      height: 2px;
+      background: #e2e8f0;
+      z-index: -1;
+    }
+
+    .timeline-item.active .timeline-connector {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .timeline-item:last-child .timeline-connector {
+      display: none;
+    }
+
+    /* 实时日志 */
+    .live-log-container {
+      background: #1a202c;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .log-header {
+      background: #2d3748;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+    }
+
+    .log-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: #48bb78;
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 0.5;
+      }
+    }
+
+    .log-content {
+      padding: 1.5rem;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .log-entry {
+      margin-bottom: 0.5rem;
+      color: #e2e8f0;
+      animation: log-appear 0.5s ease;
+    }
+
+    @keyframes log-appear {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .log-time {
+      color: #667eea;
+      margin-right: 1rem;
+    }
+
+    .log-message {
+      color: #cbd5e0;
+    }
+
+    /* 提示轮播 */
+    .tips-carousel {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .tip-item {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+      border-radius: 50px;
+      color: #4a5568;
+      font-size: 0.95rem;
+    }
+
+    .tip-item.active {
+      display: inline-flex;
+      animation: tip-fade 0.5s ease;
+    }
+
+    @keyframes tip-fade {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tip-item i {
+      color: #f6ad55;
+      font-size: 1.2rem;
+    }
+
+    /* DNA加载动画 */
+    .advanced-loader {
+      display: flex;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .loader-dna {
+      width: 60px;
+      height: 60px;
+      position: relative;
+    }
+
+    .dna-strand {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      animation: rotate-dna 3s linear infinite;
+    }
+
+    @keyframes rotate-dna {
+      0% {
+        transform: rotateY(0deg);
+      }
+      100% {
+        transform: rotateY(360deg);
+      }
+    }
+
+    .dna-circle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .dna-circle:nth-child(1) { top: 0; animation: dna-wave 1.5s ease-in-out infinite; }
+    .dna-circle:nth-child(2) { top: 12.5%; animation: dna-wave 1.5s ease-in-out infinite 0.1s; }
+    .dna-circle:nth-child(3) { top: 25%; animation: dna-wave 1.5s ease-in-out infinite 0.2s; }
+    .dna-circle:nth-child(4) { top: 37.5%; animation: dna-wave 1.5s ease-in-out infinite 0.3s; }
+    .dna-circle:nth-child(5) { top: 50%; animation: dna-wave 1.5s ease-in-out infinite 0.4s; }
+    .dna-circle:nth-child(6) { top: 62.5%; animation: dna-wave 1.5s ease-in-out infinite 0.5s; }
+    .dna-circle:nth-child(7) { top: 75%; animation: dna-wave 1.5s ease-in-out infinite 0.6s; }
+    .dna-circle:nth-child(8) { top: 87.5%; animation: dna-wave 1.5s ease-in-out infinite 0.7s; }
+
+    @keyframes dna-wave {
+      0%, 100% {
+        transform: translateX(-50%) scale(1);
+      }
+      25% {
+        transform: translateX(-50%) translateX(-20px) scale(1.2);
+      }
+      75% {
+        transform: translateX(-50%) translateX(20px) scale(1.2);
+      }
+    }
+
+    /* 滚动条样式 */
+    .log-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .log-content::-webkit-scrollbar-track {
+      background: #2d3748;
+      border-radius: 3px;
+    }
+
+    .log-content::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 3px;
+    }
+
+    .log-content::-webkit-scrollbar-thumb:hover {
+      background: #764ba2;
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .progress-card-enhanced {
+        padding: 2rem;
+      }
+
+      .progress-title {
+        font-size: 2rem;
+      }
+
+      .progress-details {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .processing-timeline {
+        flex-direction: column;
+        padding: 0;
+      }
+
+      .processing-timeline::before {
+        top: 30px;
+        left: 30px;
+        right: auto;
+        bottom: 30px;
+        width: 2px;
+        height: auto;
+      }
+
+      .timeline-connector {
+        top: 60px;
+        right: auto;
+        left: 30px;
+        width: 2px;
+        height: 100%;
+      }
+
+      .timeline-item {
+        margin-bottom: 2rem;
+        text-align: left;
+        padding-left: 80px;
+      }
+
+      .timeline-icon {
+        position: absolute;
+        left: 0;
+      }
+    }
+
+    /* 动画优化 */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+
+  <!-- 脚本 -->
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let intervalId = null;
+    let startTime = Date.now();
+    let currentStage = 1;
+    let tipsInterval = null;
+    let logInterval = null;
+
+    const progressTips = [
+      "AI模型正在分析图像中的细节特征...",
+      "深度学习算法正在识别缺陷模式...",
+      "系统正在优化检测结果的准确性...",
+      "正在应用多层卷积神经网络进行分析...",
+      "智能算法正在标注缺陷区域...",
+      "正在生成高精度的分割掩码...",
+      "系统正在进行后处理优化..."
+    ];
+
+    let tipIndex = 0;
+
+    window.onload = function() {
+      intervalId = setInterval(checkProgress, 1000);
+      tipsInterval = setInterval(updateTips, 4000);
+      logInterval = setInterval(addLogEntry, 3000);
+      setInterval(updateElapsedTime, 1000);
+    };
+
+    function updateTips() {
+      const tipElement = document.getElementById("progress-tip");
+      tipElement.style.opacity = '0';
+      setTimeout(() => {
+        tipElement.textContent = progressTips[tipIndex];
+        tipElement.style.opacity = '1';
+        tipIndex = (tipIndex + 1) % progressTips.length;
+      }, 300);
+    }
+
+    function addLogEntry() {
+      const logContent = document.getElementById("logContent");
+      const time = new Date();
+      const timeStr = `[${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}:${time.getSeconds().toString().padStart(2, '0')}]`;
+
+      const messages = [
+        "正在加载图像数据到GPU内存...",
+        "执行数据预处理和标准化...",
+        "调用深度学习模型进行推理...",
+        "应用非极大值抑制优化结果...",
+        "生成可视化标注图像...",
+        "统计缺陷分布信息...",
+        "优化输出结果格式..."
+      ];
+
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+      const newEntry = document.createElement('div');
+      newEntry.className = 'log-entry';
+      newEntry.innerHTML = `<span class="log-time">${timeStr}</span><span class="log-message">${randomMessage}</span>`;
+
+      logContent.appendChild(newEntry);
+      logContent.scrollTop = logContent.scrollHeight;
+
+      // 保持最多10条日志
+      if (logContent.children.length > 10) {
+        logContent.removeChild(logContent.children[0]);
+      }
+    }
+
+    function updateElapsedTime() {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      document.getElementById("time-elapsed").textContent =
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+      // 更新处理速度
+      const processed = parseInt(document.getElementById("processed-count").textContent);
+      if (processed > 0 && elapsed > 0) {
+        const speed = Math.round((processed / elapsed) * 60);
+        document.getElementById("speed").textContent = speed;
+      }
+    }
+
+    function checkProgress() {
+      fetch("{{ url_for('progress_status') }}")
+        .then(res => res.json())
+        .then(data => {
+          const total = data.total;
+          const processed = data.processed;
+          const done = data.done;
+
+          updateProgressBar(processed, total);
+          updateStages(processed, total);
+
+          document.getElementById("processed-count").textContent = processed;
+          document.getElementById("total-count").textContent = total;
+
+          if (done) {
+            clearInterval(intervalId);
+            clearInterval(tipsInterval);
+            clearInterval(logInterval);
+
+            // 激活所有阶段
+            document.querySelectorAll('.timeline-item').forEach(item => {
+              item.classList.add('active');
+            });
+
+            // 更新提示信息
+            document.getElementById("progress-tip").innerHTML =
+              '<i class="fas fa-check-circle text-success mr-2"></i>处理完成！正在生成检测报告...';
+
+            // 添加完成日志
+            const time = new Date();
+            const timeStr = `[${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}:${time.getSeconds().toString().padStart(2, '0')}]`;
+            const logContent = document.getElementById("logContent");
+            const newEntry = document.createElement('div');
+            newEntry.className = 'log-entry';
+            newEntry.innerHTML = `<span class="log-time">${timeStr}</span><span class="log-message" style="color: #48bb78;">✓ 所有图像处理完成，正在跳转到结果页面...</span>`;
+            logContent.appendChild(newEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+
+            setTimeout(() => {
+              window.location.href = "{{ result_url }}";
+            }, 1500);
+          }
+        })
+        .catch(err => console.log(err));
+    }
+
+    function updateProgressBar(processed, total) {
+      let percent = 0;
+      if (total > 0) {
+        percent = Math.floor((processed / total) * 100);
+      }
+      const fill = document.querySelector(".progress-fill");
+      const value = document.querySelector(".percentage-value");
+
+      fill.style.width = percent + "%";
+      value.textContent = percent;
+    }
+
+    function updateStages(processed, total) {
+      if (total === 0) return;
+
+      const progress = processed / total;
+
+      if (progress > 0 && progress <= 0.25) {
+        activateStage(1);
+      } else if (progress > 0.25 && progress <= 0.5) {
+        activateStage(2);
+      } else if (progress > 0.5 && progress <= 0.75) {
+        activateStage(3);
+      } else if (progress > 0.75) {
+        activateStage(4);
+      }
+    }
+
+    function activateStage(stage) {
+      if (stage > currentStage) {
+        currentStage = stage;
+        for (let i = 1; i <= stage; i++) {
+          document.getElementById(`stage-${i}`).classList.add('active');
+        }
+      }
+    }
+  </script>
+</body>
+</html>
