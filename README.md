@@ -93,6 +93,16 @@ python -m engine.infer_cls \
 
 以上命令将在指定目录下保存可视化结果，并在终端打印评估指标。
 
+### 模型参数量计算
+
+仓库新增 `count_params.py` 脚本，可统计任意 `.pth` 权重文件的参数总数：
+
+```bash
+python count_params.py logs/steel_model/best_model_v11.pth
+```
+
+脚本会输出参数量及按 `float32` 估算的模型大小。
+
 ## Web 演示
 
 `webapp/` 目录提供了一个基于 Flask 的简单前端，可对上传的图片进行分类和分割演示：
