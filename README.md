@@ -60,12 +60,15 @@ python -m engine.train_cls \
 
 ```bash
 python -m engine.train_seg \
-       --train_dir dataset/<task>/train/train_images \
-       --train_mask_dir dataset/<task>/train/train_masks \
-       --val_dir dataset/<task>/val/val_images \
-       --val_mask_dir dataset/<task>/val/val_masks \
-       --classes <num_classes> \
-       --epochs 200 \
+       --run_name "solar-panel_model" \
+       --train_dir "dataset/solar-panel/train/train_images" \
+       --train_mask_dir "dataset/solar-panel/train/train_masks" \
+       --val_dir "dataset/solar-panel/val/val_images" \
+       --val_mask_dir "dataset/solar-panel/val/val_masks" \
+       --classes 29 \
+       --epochs 150 \
+       --crop_size 256 \
+       --lr 1e-4 \
        --batch 8
 ```
 
