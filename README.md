@@ -108,6 +108,31 @@ python count_params.py logs/steel_model/best_model_v11.pth
 
 脚本会输出参数量及按 `float32` 估算的模型大小。
 
+## 预训练模型下载
+
+分类器以及四个分割模型均已上传至 Google Drive，方便直接测试：
+
+<https://drive.google.com/drive/folders/1iDLOm0Uc5CsU0P06J9y7t3dgQyumtTD6?usp=sharing>
+
+包含的模型及其类别数如下：
+
+- `logs/Classify/best_model.pth` – 分类器
+- `logs/phone_model_final/best_model.pth` – 4 类分割模型（含背景）
+- `logs/magnetic_model/best_model.pth` – 6 类分割模型（含背景，像素只会属于四种缺陷之一）
+- `logs/solar-panel_model/best_model.pth` – 29 类分割模型（含背景）
+- `logs/steel_model/best_model_v11.pth` – 5 类分割模型（含背景）
+
+## 数据集来源
+
+仓库示例数据整理自以下公开数据集，表中列出了对应的本地目录和类别数：
+
+| 本地目录 | 原始数据集名称 | 类别数（含背景） | 链接 |
+|----------|----------------|-----------------|------|
+| `phone` | MSD – Mobile‑Screen Defect（油渍、划痕、污渍） | 4 | <https://github.com/jianzhang96/MSD?tab=readme-ov-file> |
+| `magnetic` | Magnetic‑Tile Surface Defect (MT‑Defect) | 6 | <https://github.com/MitraDP/Detection-of-Surface-Defects-in-Magnetic-Tile-Images> |
+| `steel` | Severstal: Steel Defect Detection | 5 | <https://www.kaggle.com/competitions/severstal-steel-defect-detection> |
+| `solar-panel` | Benchmark EL Images (太阳能电池 EL 多缺陷语义分割) | 29 | <https://github.com/TheMakiran/BenchmarkELimages> |
+
 ## Web 演示
 
 `webapp/` 目录提供了一个基于 Flask 的简单前端，可对上传的图片进行分类和分割演示：
