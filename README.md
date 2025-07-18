@@ -4,8 +4,6 @@
 
 <img src="./md_images/1.png" alt="1" style="zoom:50%;" />
 
-<img src="./md_images/5.png" alt="5" style="zoom:50%;" />
-
 ## 目录结构
 
 - `data/`            数据集预处理脚本，将原始数据转换为训练/验证集
@@ -127,6 +125,9 @@ python -m engine.infer_cls \
 | `magnetic` | Magnetic‑Tile Surface Defect (MT‑Defect) | 6 | <https://github.com/MitraDP/Detection-of-Surface-Defects-in-Magnetic-Tile-Images> |
 | `steel` | Severstal: Steel Defect Detection | 5 | <https://www.kaggle.com/competitions/severstal-steel-defect-detection> |
 | `solar-panel` | Benchmark EL Images (太阳能电池 EL 多缺陷语义分割) | 29 | <https://github.com/TheMakiran/BenchmarkELimages> |
+
+
+<img src="./md_images/5.png" alt="5" style="zoom:50%;" />
 
 ## Web 演示
 
