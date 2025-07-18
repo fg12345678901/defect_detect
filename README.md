@@ -42,7 +42,7 @@ pip install -r requirements.txt
     └─ val_masks/
 ```
 
-分类数据集的结构类似，只是不包含 `*_masks` 目录。
+分类数据集可使用规范化后的整个dataset，也可另行指定。
 
 ## 训练
 
@@ -50,7 +50,7 @@ pip install -r requirements.txt
 
 ```bash
 python -m engine.train_cls \
-       --data_dir dataset/<task> \
+       --data_dir dataset/ \
        --epochs 20 \
        --batch 8 \
        --run_name Classify_test
