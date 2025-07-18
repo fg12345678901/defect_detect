@@ -138,12 +138,16 @@ python app.py
 启动后访问 `http://localhost:5000/` 即可使用界面上传图片查看结果。
 
 部分webui演示画面如下：
+
+<img src="./md_images/4.png" alt="4" style="zoom:50%;" />
+
+
 <img src="./md_images/2.png" alt="2" style="zoom:50%;" />
 
 
 <img src="./md_images/3.png" alt="3" style="zoom:50%;" />
 
 
-<img src="./md_images/4.png" alt="4" style="zoom:50%;" />
+
 
 
