@@ -1,0 +1,17 @@
+# Core ML libraries
+torch
+torchvision
+torchaudio
+segmentation-models-pytorch
+albumentations
+opencv-python
+numpy
+Pillow
+tqdm
+scikit-learn
+
+# Web application and visualization
+flask
+pdfkit
+reportlab
+matplotlib

@@ -23,8 +23,10 @@
 
 ```bash
 pip install torch torchvision torchaudio
-pip install -r requirements.txt  # 若无该文件，可按需安装 flask、segmentation_models_pytorch 等
+pip install -r requirements.txt
 ```
+
+`requirements.txt` 中已列出了 Flask、segmentation_models_pytorch 等常用依赖，如有需要可根据实际环境增删。
 
 ## 数据集准备
 
