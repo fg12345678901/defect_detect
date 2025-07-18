@@ -4,6 +4,8 @@
 
 <img src="./md_images/1.png" alt="1" style="zoom:50%;" />
 
+<img src="./md_images/5.png" alt="5" style="zoom:50%;" />
+
 ## 目录结构
 
 - `data/`            数据集预处理脚本，将原始数据转换为训练/验证集
