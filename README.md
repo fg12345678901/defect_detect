@@ -14,7 +14,7 @@
 - `models/`          分类与分割模型定义
 - `losses/`          损失函数实现
 - `utils/`           指标计算与可视化工具
-- `webapp/`          简易 Web 演示界面
+- `webapp/`          Web 演示界面
 - `logs/`            训练过程生成的模型权重和 TensorBoard 日志
 
 ## 依赖安装
@@ -98,19 +98,10 @@ python -m engine.infer_cls \
 
 以上命令将在指定目录下保存可视化结果，并在终端打印评估指标。
 
-### 模型参数量计算
-
-仓库新增 `count_params.py` 脚本，可统计任意 `.pth` 权重文件的参数总数：
-
-```bash
-python count_params.py logs/steel_model/best_model_v11.pth
-```
-
-脚本会输出参数量及按 `float32` 估算的模型大小。
 
 ## 预训练模型下载
 
-分类器以及四个分割模型均已上传至 Google Drive，方便直接测试：
+分类器以及四个分割模型均已上传至 Google Drive：
 
 <https://drive.google.com/drive/folders/1iDLOm0Uc5CsU0P06J9y7t3dgQyumtTD6?usp=sharing>
 
@@ -118,7 +109,7 @@ python count_params.py logs/steel_model/best_model_v11.pth
 
 - `logs/Classify/best_model.pth` – 分类器
 - `logs/phone_model_final/best_model.pth` – 4 类分割模型（含背景）
-- `logs/magnetic_model/best_model.pth` – 6 类分割模型（含背景，像素只会属于四种缺陷之一）
+- `logs/magnetic_model/best_model.pth` – 6 类分割模型（含背景）
 - `logs/solar-panel_model/best_model.pth` – 29 类分割模型（含背景）
 - `logs/steel_model/best_model_v11.pth` – 5 类分割模型（含背景）
 
@@ -144,6 +135,4 @@ python app.py
 
 启动后访问 `http://localhost:5000/` 即可使用界面上传图片查看结果。
 
-## 致谢
 
-仓库包含的部分脚本整理自公开数据集和教程，仅供学习与研究使用。
